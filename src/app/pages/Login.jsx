@@ -5,8 +5,10 @@ import { api } from "../../api";
 
 export default function Login() {
   const navigate = useNavigate();
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -18,7 +20,6 @@ export default function Login() {
 
     try {
       const res = await api.post("/api/auth/login/", {
-        // NOTE: if backend expects username, change to: username: email
         email,
         password,
       });
@@ -39,7 +40,14 @@ export default function Login() {
       localStorage.setItem("accessToken", access);
       if (refresh) localStorage.setItem("refreshToken", refresh);
 
-      navigate("/admin");
+      const user = res.data.user;
+
+if (!user.gym) {
+  navigate("/gym-setup");
+} else {
+  navigate("/admin");
+}
+
     } catch (err) {
       const msg =
         err?.response?.data?.detail ||
@@ -53,93 +61,107 @@ export default function Login() {
   };
 
   return (
-    <div className="relative min-h-[100dvh] bg-black text-white flex items-center justify-center px-4 py-8 sm:py-12">
-      {/* Gradient background effect */}
+    <div className="relative min-h-[100svh] bg-black text-white flex items-center justify-center px-4 py-10">
+      {/* Background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {/* smaller circles on mobile, bigger on desktop */}
-        <div className="absolute top-10 left-6 sm:top-1/4 sm:left-1/4 w-56 h-56 sm:w-96 sm:h-96 bg-purple-600/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 right-6 sm:bottom-1/4 sm:right-1/4 w-56 h-56 sm:w-96 sm:h-96 bg-blue-600/20 rounded-full blur-3xl" />
+        <div className="absolute top-20 left-6 w-64 h-64 bg-purple-600/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-20 right-6 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl" />
       </div>
 
       <div className="w-full max-w-md relative z-10">
-        {/* Logo/Brand */}
-        <div className="text-center mb-6 sm:mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 sm:w-16 sm:h-16 bg-white/10 rounded-2xl mb-3 sm:mb-4 backdrop-blur-sm">
-            <Dumbbell className="w-7 h-7 sm:w-8 sm:h-8 text-white" />
+        {/* Logo Section */}
+        <div className="text-center mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl mb-4 backdrop-blur-md shadow-lg">
+            <Dumbbell className="w-8 h-8 text-white" />
           </div>
 
-          <h1 className="text-3xl sm:text-4xl mb-1 sm:mb-2 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
+          <h1 className="text-3xl font-semibold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
             GymFlow
           </h1>
 
-          <p className="text-sm sm:text-base text-gray-400">
+          <p className="text-sm text-gray-400 mt-1">
             Manage your gym with ease
           </p>
         </div>
 
-        {/* Login Form */}
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl sm:rounded-3xl p-5 sm:p-8">
-          <h2 className="text-xl sm:text-2xl mb-4 sm:mb-6">Welcome Back</h2>
+        {/* Login Card */}
+        <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl">
+          <h2 className="text-2xl font-semibold mb-6 text-center">
+            Welcome Back
+          </h2>
 
           {error && (
-            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-200 text-sm break-words">
+            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 text-sm break-words">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-5">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Email */}
             <div>
-              <label htmlFor="email" className="block text-sm text-gray-300 mb-2">
+              <label className="block text-sm text-gray-300 mb-2">
                 Email Address
               </label>
               <input
-                id="email"
                 type="email"
                 inputMode="email"
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-white/30 transition-colors"
+                className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-transparent transition-all"
                 placeholder="you@example.com"
                 required
               />
             </div>
 
+            {/* Password */}
             <div>
-              <label htmlFor="password" className="block text-sm text-gray-300 mb-2">
+              <label className="block text-sm text-gray-300 mb-2">
                 Password
               </label>
-              <input
-                id="password"
-                type="password"
-                autoComplete="current-password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-white/30 transition-colors"
-                placeholder="••••••••"
-                required
-              />
+
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full px-4 py-3.5 pr-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-transparent transition-all"
+                  placeholder="••••••••"
+                  required
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
             </div>
 
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 bg-white text-black rounded-xl hover:bg-gray-200 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-60 disabled:cursor-not-allowed active:scale-[0.99]"
+              className="w-full py-3.5 rounded-xl font-medium bg-gradient-to-r from-white to-gray-300 text-black transition-all duration-200 shadow-lg hover:shadow-xl active:scale-[0.98] disabled:opacity-60"
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>
           </form>
 
-          <div className="mt-5 sm:mt-6 text-center text-sm text-gray-400">
-            Don't have an account?{" "}
+          {/* Signup link */}
+          <div className="mt-6 text-center text-sm text-gray-400">
+            Don’t have an account?{" "}
             <Link to="/signup" className="text-white hover:underline">
               Sign up
             </Link>
           </div>
         </div>
 
-        {/* Bottom link */}
-        <div className="mt-6 sm:mt-8 text-center">
+        {/* Bottom Link */}
+        <div className="mt-8 text-center">
           <Link
             to="/pricing"
             className="text-gray-400 hover:text-white transition-colors text-sm"

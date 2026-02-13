@@ -9,6 +9,7 @@ import {
   LogOut,
   Menu,
   X,
+  ExpandIcon,
 } from "lucide-react";
 
 export default function Navigation() {
@@ -21,6 +22,7 @@ export default function Navigation() {
     { path: "/members", label: "Members", icon: Users },
     { path: "/subscriptions", label: "Subscriptions", icon: Bell },
     { path: "/pricing", label: "Pricing", icon: DollarSign },
+   
   ];
 
   const handleLogout = () => {
