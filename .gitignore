@@ -1,0 +1,46 @@
+# ================= PYTHON =================
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.log
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Django
+staticfiles/
+media/
+db.sqlite3
+
+# Test / coverage
+.coverage
+htmlcov/
+.pytest_cache/
+
+# ================= NODE / VITE =================
+node_modules/
+dist/
+build/
+.vite/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# ================= EDITOR =================
+.vscode/
+.idea/
+
+# ================= OS =================
+.DS_Store
+Thumbs.db
