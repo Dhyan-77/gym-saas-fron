@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { Dumbbell, MapPin } from "lucide-react";
 import { api } from "../../api";
+import { setActiveGymId } from "../../utils/gym";
 
 export default function GymSetup() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [hasExistingGyms, setHasExistingGyms] = useState(false);
 
   const [formData, setFormData] = useState({
     gymName: "",
@@ -17,6 +19,19 @@ export default function GymSetup() {
     phone: "",
     email: "",
   });
+
+  // Detect if user already has gyms (add another vs first-time setup)
+  useEffect(() => {
+    const token = localStorage.getItem("access");
+    if (!token) return;
+    api
+      .get("/api/gyms/")
+      .then((res) => {
+        const list = Array.isArray(res.data) ? res.data : [];
+        setHasExistingGyms(list.length > 0);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,10 +48,13 @@ export default function GymSetup() {
         .filter(Boolean)
         .join(", ");
 
-      await api.post("/api/gyms/", {
+      const res = await api.post("/api/gyms/", {
         name: formData.gymName,
         address: fullAddress,
       });
+
+      // Switch to the new gym so dashboard/members show it
+      if (res.data?.id) setActiveGymId(res.data.id);
 
       navigate("/admin");
     } catch (err) {
@@ -68,11 +86,13 @@ export default function GymSetup() {
           </div>
 
           <h1 className="text-3xl sm:text-4xl mb-2 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
-            Setup Your Gym
+            {hasExistingGyms ? "Add another gym" : "Setup Your Gym"}
           </h1>
 
           <p className="text-gray-400 text-sm sm:text-base">
-            Add your gym details to get started
+            {hasExistingGyms
+              ? "Add a new gym to your account"
+              : "Add your gym details to get started"}
           </p>
         </div>
 
@@ -177,10 +197,10 @@ export default function GymSetup() {
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
               <button
                 type="button"
-                onClick={() => navigate("/")}
+                onClick={() => navigate(hasExistingGyms ? "/admin" : "/")}
                 className="w-full sm:flex-1 px-6 py-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition"
               >
-                Back
+                {hasExistingGyms ? "Back to Dashboard" : "Back"}
               </button>
 
               <button
@@ -188,7 +208,11 @@ export default function GymSetup() {
                 disabled={loading}
                 className="w-full sm:flex-1 px-6 py-3 bg-white text-black rounded-xl hover:bg-gray-200 transition disabled:opacity-60"
               >
-                {loading ? "Creating..." : "Continue to Dashboard"}
+                {loading
+                  ? "Creating..."
+                  : hasExistingGyms
+                    ? "Add gym"
+                    : "Continue to Dashboard"}
               </button>
             </div>
           </form>

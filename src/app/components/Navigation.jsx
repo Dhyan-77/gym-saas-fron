@@ -13,6 +13,7 @@ import {
   Menu,
   X,
   Building2,
+  Plus,
 } from "lucide-react";
 
 // simple DRF error parser (no extra util file needed)
@@ -175,6 +176,15 @@ export default function Navigation() {
                       </option>
                     ))}
                 </select>
+
+                <Link
+                  to="/gym-setup"
+                  className="flex items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl text-white text-sm transition"
+                  title="Add new gym"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add gym</span>
+                </Link>
               </div>
             )}
 
@@ -226,6 +236,15 @@ export default function Navigation() {
                       </option>
                     ))}
                 </select>
+
+                <Link
+                  to="/gym-setup"
+                  onClick={() => setOpen(false)}
+                  className="flex items-center gap-2 mt-2 px-3 py-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl text-white text-sm transition"
+                >
+                  <Plus className="w-4 h-4" />
+                  <span>Add new gym</span>
+                </Link>
 
                 {gymError ? (
                   <div className="mt-2 text-xs text-red-300 whitespace-pre-line">
