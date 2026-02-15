@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Dumbbell, MapPin, Phone, Mail } from "lucide-react";
-import { api } from "../../api"; // make sure path is correct
+import { Dumbbell, MapPin } from "lucide-react";
+import { api } from "../../api";
 
 export default function GymSetup() {
   const navigate = useNavigate();
@@ -24,14 +24,31 @@ export default function GymSetup() {
     setLoading(true);
 
     try {
-      await api.post("/api/gym/create/", formData);
+      const fullAddress = [
+        formData.address,
+        formData.city,
+        formData.state,
+        formData.zipCode,
+      ]
+        .filter(Boolean)
+        .join(", ");
+
+      await api.post("/api/gyms/", {
+        name: formData.gymName,
+        address: fullAddress,
+      });
+
       navigate("/admin");
     } catch (err) {
-      setError(
-        err?.response?.data?.detail ||
-        err?.response?.data?.message ||
-        "Failed to create gym"
-      );
+      const data = err?.response?.data;
+      const msg =
+        data?.detail ||
+        (data && typeof data === "object"
+          ? Object.values(data).flat().join(" ")
+          : null) ||
+        "Failed to create gym";
+
+      setError(msg);
     } finally {
       setLoading(false);
     }
@@ -39,14 +56,12 @@ export default function GymSetup() {
 
   return (
     <div className="min-h-screen bg-black text-white p-4 relative">
-      {/* Gradient Background */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-purple-600/20 rounded-full blur-3xl" />
         <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-blue-600/20 rounded-full blur-3xl" />
       </div>
 
       <div className="max-w-2xl mx-auto pt-12 pb-20 relative z-10">
-        {/* Header */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-14 h-14 bg-white/10 rounded-2xl mb-4 backdrop-blur-sm">
             <Dumbbell className="w-7 h-7 text-white" />
@@ -61,7 +76,6 @@ export default function GymSetup() {
           </p>
         </div>
 
-        {/* Form Card */}
         <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-8">
           {error && (
             <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-sm">
@@ -70,7 +84,6 @@ export default function GymSetup() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Gym Name */}
             <div>
               <label className="block text-sm text-gray-300 mb-2">
                 Gym Name *
@@ -87,7 +100,6 @@ export default function GymSetup() {
               />
             </div>
 
-            {/* Address */}
             <div>
               <label className="block text-sm text-gray-300 mb-2">
                 <MapPin className="w-4 h-4 inline mr-1" />
@@ -105,7 +117,6 @@ export default function GymSetup() {
               />
             </div>
 
-            {/* City, State, Zip */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <input
                 type="text"
@@ -141,7 +152,6 @@ export default function GymSetup() {
               />
             </div>
 
-            {/* Contact */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <input
                 type="tel"
@@ -164,7 +174,6 @@ export default function GymSetup() {
               />
             </div>
 
-            {/* Buttons */}
             <div className="flex flex-col sm:flex-row gap-3 pt-4">
               <button
                 type="button"

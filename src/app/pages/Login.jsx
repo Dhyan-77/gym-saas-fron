@@ -19,35 +19,27 @@ export default function Login() {
     setLoading(true);
 
     try {
-      const res = await api.post("/api/auth/login/", {
-        email,
+      const normalizedEmail = email.trim().toLowerCase();
+
+      // ✅ SimpleJWT login
+      const tokenRes = await api.post("/api/auth/login/", {
+        username: normalizedEmail,
         password,
       });
 
-      const access =
-        res.data.access ||
-        res.data.access_token ||
-        res.data.token ||
-        res.data?.tokens?.access;
-
-      const refresh =
-        res.data.refresh ||
-        res.data.refresh_token ||
-        res.data?.tokens?.refresh;
+      const access = tokenRes.data?.access;
+      const refresh = tokenRes.data?.refresh;
 
       if (!access) throw new Error("No access token returned from login API");
 
-      localStorage.setItem("accessToken", access);
-      if (refresh) localStorage.setItem("refreshToken", refresh);
+      localStorage.setItem("access", access);
+      if (refresh) localStorage.setItem("refresh", refresh);
 
-      const user = res.data.user;
+      // ✅ Check if gym exists
+      const gymsRes = await api.get("/api/gyms/");
+      const gyms = Array.isArray(gymsRes.data) ? gymsRes.data : [];
 
-if (!user.gym) {
-  navigate("/gym-setup");
-} else {
-  navigate("/admin");
-}
-
+      navigate(gyms.length ? "/admin" : "/gym-setup");
     } catch (err) {
       const msg =
         err?.response?.data?.detail ||
@@ -62,14 +54,12 @@ if (!user.gym) {
 
   return (
     <div className="relative min-h-[100svh] bg-black text-white flex items-center justify-center px-4 py-10">
-      {/* Background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-6 w-64 h-64 bg-purple-600/20 rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-6 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl" />
       </div>
 
       <div className="w-full max-w-md relative z-10">
-        {/* Logo Section */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl mb-4 backdrop-blur-md shadow-lg">
             <Dumbbell className="w-8 h-8 text-white" />
@@ -79,12 +69,9 @@ if (!user.gym) {
             GymFlow
           </h1>
 
-          <p className="text-sm text-gray-400 mt-1">
-            Manage your gym with ease
-          </p>
+          <p className="text-sm text-gray-400 mt-1">Manage your gym with ease</p>
         </div>
 
-        {/* Login Card */}
         <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl">
           <h2 className="text-2xl font-semibold mb-6 text-center">
             Welcome Back
@@ -97,7 +84,6 @@ if (!user.gym) {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Email */}
             <div>
               <label className="block text-sm text-gray-300 mb-2">
                 Email Address
@@ -114,7 +100,6 @@ if (!user.gym) {
               />
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-sm text-gray-300 mb-2">
                 Password
@@ -141,7 +126,6 @@ if (!user.gym) {
               </div>
             </div>
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
@@ -151,7 +135,6 @@ if (!user.gym) {
             </button>
           </form>
 
-          {/* Signup link */}
           <div className="mt-6 text-center text-sm text-gray-400">
             Don’t have an account?{" "}
             <Link to="/signup" className="text-white hover:underline">
@@ -160,7 +143,6 @@ if (!user.gym) {
           </div>
         </div>
 
-        {/* Bottom Link */}
         <div className="mt-8 text-center">
           <Link
             to="/pricing"

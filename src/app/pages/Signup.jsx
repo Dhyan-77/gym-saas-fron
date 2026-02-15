@@ -7,7 +7,7 @@ export default function Signup() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    name: "",
+    name: "", // UI only (backend doesn't use it)
     email: "",
     password: "",
     confirmPassword: "",
@@ -20,69 +20,40 @@ export default function Signup() {
   const [error, setError] = useState("");
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
+  e.preventDefault();
+  setError("");
 
-    if (formData.password !== formData.confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
+  if (formData.password !== formData.confirmPassword) {
+    setError("Passwords do not match.");
+    return;
+  }
 
-    setLoading(true);
+  setLoading(true);
 
-    try {
-      const res = await api.post("/api/auth/signup/", {
-        name: formData.name,
-        email: formData.email,
-        username: formData.email,
-        password: formData.password,
-      });
+  try {
+    // ✅ backend expects only email + password
+    await api.post("/api/auth/signup/", {
+      email: formData.email,
+      password: formData.password,
+    });
 
-      const access =
-        res.data.access ||
-        res.data.access_token ||
-        res.data.token ||
-        res.data?.tokens?.access;
-
-      const refresh =
-        res.data.refresh ||
-        res.data.refresh_token ||
-        res.data?.tokens?.refresh;
-
-      if (access) {
-        localStorage.setItem("accessToken", access);
-        if (refresh) localStorage.setItem("refreshToken", refresh);
-      }
-
-      navigate("/gym-setup");
-    } catch (err) {
-      const data = err?.response?.data;
-
-      const msg =
-        data?.detail ||
-        data?.message ||
-        (data && typeof data === "object"
-          ? Object.values(data).flat().join(" ")
-          : null) ||
-        err?.message ||
-        "Signup failed";
-
-      setError(msg);
-    } finally {
-      setLoading(false);
-    }
-  };
+    // you DON'T auto-login in backend signup, so redirect to login
+    navigate("/");
+  } catch (err) {
+    setError(extractApiError(err));
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="relative min-h-[100svh] bg-black text-white flex items-center justify-center px-4 py-10">
-      {/* Background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-20 left-6 w-64 h-64 bg-purple-600/20 rounded-full blur-3xl" />
         <div className="absolute bottom-20 right-6 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl" />
       </div>
 
       <div className="w-full max-w-md relative z-10">
-        {/* Brand */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl mb-4 backdrop-blur-md shadow-lg">
             <Dumbbell className="w-8 h-8 text-white" />
@@ -97,7 +68,6 @@ export default function Signup() {
           </p>
         </div>
 
-        {/* Card */}
         <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl">
           <h2 className="text-2xl font-semibold mb-6 text-center">
             Create Account
@@ -110,7 +80,6 @@ export default function Signup() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            {/* Name */}
             <div>
               <label className="block text-sm text-gray-300 mb-2">
                 Full Name
@@ -128,7 +97,6 @@ export default function Signup() {
               />
             </div>
 
-            {/* Email */}
             <div>
               <label className="block text-sm text-gray-300 mb-2">
                 Email Address
@@ -147,7 +115,6 @@ export default function Signup() {
               />
             </div>
 
-            {/* Password */}
             <div>
               <label className="block text-sm text-gray-300 mb-2">
                 Password
@@ -175,7 +142,6 @@ export default function Signup() {
               </div>
             </div>
 
-            {/* Confirm Password */}
             <div>
               <label className="block text-sm text-gray-300 mb-2">
                 Confirm Password
@@ -198,9 +164,7 @@ export default function Signup() {
                 />
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowConfirmPassword(!showConfirmPassword)
-                  }
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
                 >
                   {showConfirmPassword ? "Hide" : "Show"}
@@ -208,7 +172,6 @@ export default function Signup() {
               </div>
             </div>
 
-            {/* Terms */}
             <div className="flex items-start gap-3 text-sm">
               <input
                 type="checkbox"
@@ -227,7 +190,6 @@ export default function Signup() {
               </label>
             </div>
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading}

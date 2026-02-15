@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: "https://gym-saas-1.onrender.com",
+  baseURL: "http://127.0.0.1:8000",
   headers: {
     "Content-Type": "application/json",
   },
@@ -9,7 +9,7 @@ export const api = axios.create({
 
 // attach JWT automatically on every request
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem("accessToken");
+  const token = localStorage.getItem("access"); // ✅ changed
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
