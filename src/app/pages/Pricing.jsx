@@ -22,7 +22,7 @@ export default function Pricing() {
     },
     {
       name: "Growth",
-      price: billedYearly ? "$99" : "$9.99",
+      price: billedYearly ? "₹1999" : "₹199",
       period: billedYearly ? "/year" : "/month",
       description: "Built for gym owners ready to scale",
       popular: true,

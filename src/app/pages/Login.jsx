@@ -143,14 +143,7 @@ export default function Login() {
           </div>
         </div>
 
-        <div className="mt-8 text-center">
-          <Link
-            to="/pricing"
-            className="text-gray-400 hover:text-white transition-colors text-sm"
-          >
-            View Pricing Plans →
-          </Link>
-        </div>
+        
       </div>
     </div>
   );
