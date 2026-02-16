@@ -10,3 +10,6 @@ export function getActiveGymId(gyms) {
 export function setActiveGymId(id) {
   localStorage.setItem("activeGymId", id);
 }
+
+
+

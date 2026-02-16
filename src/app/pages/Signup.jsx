@@ -40,7 +40,7 @@ export default function Signup() {
     // you DON'T auto-login in backend signup, so redirect to login
     navigate("/");
   } catch (err) {
-    setError(extractApiError(err));
+    setError(err);
   } finally {
     setLoading(false);
   }
@@ -75,7 +75,7 @@ export default function Signup() {
 
           {error && (
             <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 text-sm break-words">
-              {error}
+              {error.data}
             </div>
           )}
 
