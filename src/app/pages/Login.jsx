@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
 import { Dumbbell } from "lucide-react";
-import { api } from "../../api";
+import { api, getApiBaseURL } from "../../api";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -12,6 +12,7 @@ export default function Login() {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [connectionCheck, setConnectionCheck] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -42,13 +43,51 @@ export default function Login() {
       navigate(gyms.length ? "/admin" : "/gym-setup");
     } catch (err) {
       const msg =
+        err?.userMessage ||
         err?.response?.data?.detail ||
         err?.response?.data?.message ||
         err?.message ||
         "Login failed";
-      setError(msg);
+      const apiUrl = getApiBaseURL();
+      setError(
+        apiUrl && (msg.includes("Cannot reach") || err?.code === "ERR_NETWORK")
+          ? `${msg}\n\nAPI: ${apiUrl}`
+          : msg
+      );
     } finally {
       setLoading(false);
+    }
+  };
+
+  const checkConnection = async () => {
+    const url = getApiBaseURL();
+    const displayUrl = url || "same origin (proxied)";
+    setConnectionCheck({ status: "checking", url: displayUrl });
+    try {
+      const healthUrl = url ? `${url.replace(/\/$/, "")}/api/health/` : "/api/health/";
+      const res = await fetch(healthUrl, { method: "GET" });
+      if (res.ok) {
+        setConnectionCheck({
+          status: "ok",
+          url: displayUrl,
+          message: "Backend reachable.",
+        });
+      } else {
+        setConnectionCheck({
+          status: "error",
+          url: displayUrl,
+          message: `HTTP ${res.status}`,
+        });
+      }
+    } catch (e) {
+      const msg = e?.message || String(e);
+      setConnectionCheck({
+        status: "error",
+        url: displayUrl,
+        message: msg.includes("Failed to fetch") || msg.includes("NetworkError")
+          ? "Cannot reach server. Check connection."
+          : msg,
+      });
     }
   };
 
@@ -78,7 +117,7 @@ export default function Login() {
           </h2>
 
           {error && (
-            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 text-sm break-words">
+            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 text-sm break-words whitespace-pre-line">
               {error}
             </div>
           )}
@@ -140,6 +179,26 @@ export default function Login() {
             <Link to="/signup" className="text-white hover:underline">
               Sign up
             </Link>
+          </div>
+
+          <div className="mt-4 pt-4 border-t border-white/10">
+            <button
+              type="button"
+              onClick={checkConnection}
+              className="text-xs text-gray-500 hover:text-gray-300 w-full text-center"
+            >
+              Check connection
+            </button>
+            {connectionCheck && (
+              <div className="mt-2 p-2 rounded-lg bg-white/5 text-xs text-left whitespace-pre-line">
+                <div className="text-gray-400">API: {connectionCheck.url}</div>
+                <div className={connectionCheck.status === "ok" ? "text-green-400 mt-1" : "text-amber-400 mt-1"}>
+                  {connectionCheck.status === "checking"
+                    ? "Checking..."
+                    : connectionCheck.message}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

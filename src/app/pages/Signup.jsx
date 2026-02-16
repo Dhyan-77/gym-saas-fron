@@ -40,7 +40,21 @@ export default function Signup() {
     // you DON'T auto-login in backend signup, so redirect to login
     navigate("/");
   } catch (err) {
-    setError(err);
+    const data = err?.response?.data;
+    const msg =
+      err?.userMessage ||
+      (typeof data?.detail === "string"
+        ? data.detail
+        : data?.email?.[0] ||
+          data?.password?.[0] ||
+          (data && typeof data === "object"
+            ? Object.entries(data)
+                .map(([k, v]) => (Array.isArray(v) ? `${k}: ${v.join(" ")}` : `${k}: ${v}`))
+                .join("\n")
+            : null)) ||
+      err?.message ||
+      "Signup failed. Check your connection and try again.";
+    setError(msg);
   } finally {
     setLoading(false);
   }
@@ -74,8 +88,8 @@ export default function Signup() {
           </h2>
 
           {error && (
-            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 text-sm break-words">
-              {error.data}
+            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 text-sm break-words whitespace-pre-line">
+              {error}
             </div>
           )}
 

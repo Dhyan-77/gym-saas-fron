@@ -1,0 +1,12 @@
+# Proxy /api to Railway — same-origin requests, no CORS, works on mobile
+[[redirects]]
+  from = "/api/*"
+  to = "https://unique-enthusiasm-production.up.railway.app/api/:splat"
+  status = 200
+  force = true
+
+# index.html: no-cache so mobile picks up new deploy
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
