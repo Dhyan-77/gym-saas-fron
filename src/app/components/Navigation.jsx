@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { api } from "../../api";
-import { getActiveGymId, setActiveGymId } from "../../utils/gym";
+import { getActiveGymId, setActiveGymId as saveActiveGymId } from "../../utils/gym";
 
 import {
   Dumbbell,
@@ -38,6 +38,7 @@ function parseError(err) {
 export default function Navigation() {
   const location = useLocation();
   const navigate = useNavigate();
+
   const [open, setOpen] = useState(false);
 
   // gyms dropdown state
@@ -45,12 +46,10 @@ export default function Navigation() {
   const [activeGymId, setActiveGymIdState] = useState("");
   const [gymLoading, setGymLoading] = useState(true);
   const [gymError, setGymError] = useState("");
- useEffect(() => {
-  api.get("/api/billing/me/")
-    .then(res => {
-      setSubscription(res.data);
-    });
-}, []);
+
+  // ✅ subscription state (for PRO badge)
+  const [sub, setSub] = useState(null);
+
   const navItems = [
     { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { path: "/members", label: "Members", icon: Users },
@@ -58,7 +57,34 @@ export default function Navigation() {
     { path: "/pricing", label: "Pricing", icon: DollarSign },
   ];
 
-  // load gyms once
+  const showGymSwitcher = location.pathname !== "/pricing";
+
+  // ✅ Load subscription status (safe, won’t crash)
+  useEffect(() => {
+    let mounted = true;
+
+    async function loadSubscription() {
+      try {
+        const token = localStorage.getItem("access");
+        if (!token) return;
+
+        const res = await api.get("/api/billing/me/");
+        if (!mounted) return;
+
+        setSub(res.data);
+      } catch (err) {
+        // ignore (401 etc.)
+      }
+    }
+
+    loadSubscription();
+
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // ✅ Load gyms once
   useEffect(() => {
     let mounted = true;
 
@@ -70,6 +96,7 @@ export default function Navigation() {
         const token = localStorage.getItem("access");
         if (!token) {
           // user not logged in, don't call protected API
+          if (!mounted) return;
           setGyms([]);
           setActiveGymIdState("");
           return;
@@ -101,8 +128,13 @@ export default function Navigation() {
 
   const handleGymChange = (e) => {
     const id = e.target.value;
-    setActiveGymId(id); // saves to localStorage
+
+    // ✅ persist selection
+    saveActiveGymId(id);
+
+    // ✅ update local state
     setActiveGymIdState(id);
+
     setOpen(false);
 
     // simplest + reliable so all pages re-fetch with new gym id
@@ -113,10 +145,13 @@ export default function Navigation() {
     localStorage.removeItem("access");
     localStorage.removeItem("refresh");
     localStorage.removeItem("activeGymId");
+
+    setSub(null);
+    setGyms([]);
+    setActiveGymIdState("");
+
     navigate("/");
   };
-
-  const showGymSwitcher = location.pathname !== "/pricing"; // optional: hide on pricing if you want
 
   return (
     <nav className="bg-white/5 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
@@ -155,12 +190,12 @@ export default function Navigation() {
             })}
           </div>
 
-
+          {/* ✅ PRO Badge */}
           {sub?.status === "active" && (
-  <span className="bg-green-500 text-black px-3 py-1 rounded-full text-xs">
-    PRO • {sub.days_remaining} days left
-  </span>
-)}
+            <span className="hidden md:inline-flex bg-green-500 text-black px-3 py-1 rounded-full text-xs font-semibold">
+              PRO • {sub?.days_remaining ?? 0} days left
+            </span>
+          )}
 
           {/* Desktop Right Side: Gym switcher + Logout */}
           <div className="hidden md:flex items-center gap-3">
@@ -221,6 +256,15 @@ export default function Navigation() {
         {/* Mobile Dropdown */}
         {open && (
           <div className="md:hidden pb-4 space-y-2">
+            {/* ✅ Mobile PRO Badge */}
+            {sub?.status === "active" && (
+              <div className="px-4 pt-2">
+                <span className="inline-flex bg-green-500 text-black px-3 py-1 rounded-full text-xs font-semibold">
+                  PRO • {sub?.days_remaining ?? 0} days left
+                </span>
+              </div>
+            )}
+
             {/* Mobile Gym Switcher */}
             {showGymSwitcher && (
               <div className="px-2">
