@@ -45,7 +45,12 @@ export default function Navigation() {
   const [activeGymId, setActiveGymIdState] = useState("");
   const [gymLoading, setGymLoading] = useState(true);
   const [gymError, setGymError] = useState("");
-
+ useEffect(() => {
+  api.get("/api/billing/me/")
+    .then(res => {
+      setSubscription(res.data);
+    });
+}, []);
   const navItems = [
     { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { path: "/members", label: "Members", icon: Users },
@@ -149,6 +154,13 @@ export default function Navigation() {
               );
             })}
           </div>
+
+
+          {sub?.status === "active" && (
+  <span className="bg-green-500 text-black px-3 py-1 rounded-full text-xs">
+    PRO • {sub.days_remaining} days left
+  </span>
+)}
 
           {/* Desktop Right Side: Gym switcher + Logout */}
           <div className="hidden md:flex items-center gap-3">

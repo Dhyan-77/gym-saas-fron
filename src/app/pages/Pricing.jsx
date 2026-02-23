@@ -41,7 +41,9 @@ export default function Pricing() {
         description: `GymFlow Pro (${billingCycle.replace("_", " ")})`,
         theme: { color: "#111111" },
         handler: function () {
-          window.location.href = "/dashboard";
+          setTimeout(() => {
+  window.location.href = "/dashboard";
+}, 1500);
         },
       };
 
