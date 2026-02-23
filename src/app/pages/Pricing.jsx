@@ -7,7 +7,6 @@ export default function Pricing() {
   const [billingCycle, setBillingCycle] = useState("monthly");
   const [loading, setLoading] = useState(false);
 
-  // DB plan IDs (NOT razorpay_plan_id string)
   const PLAN_IDS = {
     monthly: 1,
     six_months: 2,
@@ -40,10 +39,8 @@ export default function Pricing() {
         subscription_id,
         name: "GymFlow Pro",
         description: `GymFlow Pro (${billingCycle.replace("_", " ")})`,
-        theme: { color: "#ffffff" },
-
+        theme: { color: "#111111" },
         handler: function () {
-          // After payment success
           window.location.href = "/dashboard";
         },
       };
@@ -59,81 +56,88 @@ export default function Pricing() {
   };
 
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="min-h-screen bg-gradient-to-b from-black via-zinc-900 to-black text-white">
       <Navigation />
 
-      <div className="max-w-3xl mx-auto px-6 py-16 text-center">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 py-16 text-center">
 
-        <h1 className="text-4xl font-bold mb-4">
-          GymFlow Pro
+        {/* Header */}
+        <h1 className="text-3xl sm:text-5xl font-bold mb-4 tracking-tight">
+          Upgrade to <span className="text-white">GymFlow Pro</span>
         </h1>
 
-        <p className="text-gray-400 mb-10">
-          Everything you need to manage members and renewals.
+        <p className="text-gray-400 max-w-xl mx-auto mb-12 text-sm sm:text-base">
+          Everything you need to manage members, track revenue, and automate renewals — built for serious gym owners.
         </p>
 
-        {/* Billing Options */}
-        <div className="flex justify-center gap-4 mb-10">
-          {["monthly", "six_months", "yearly"].map((cycle) => (
-            <button
-              key={cycle}
-              onClick={() => setBillingCycle(cycle)}
-              className={`px-5 py-2 rounded-full text-sm transition ${
-                billingCycle === cycle
-                  ? "bg-white text-black"
-                  : "bg-white/10 hover:bg-white/20"
-              }`}
-            >
-              {cycle === "six_months"
-                ? "6 Months"
-                : cycle.charAt(0).toUpperCase() + cycle.slice(1)}
-            </button>
-          ))}
+        {/* Billing Toggle */}
+        <div className="flex justify-center mb-12">
+          <div className="flex bg-white/5 border border-white/10 p-1 rounded-full backdrop-blur-lg">
+            {["monthly", "six_months", "yearly"].map((cycle) => (
+              <button
+                key={cycle}
+                onClick={() => setBillingCycle(cycle)}
+                className={`px-4 sm:px-6 py-2 text-xs sm:text-sm rounded-full transition-all duration-300 ${
+                  billingCycle === cycle
+                    ? "bg-white text-black shadow-lg"
+                    : "text-gray-400 hover:text-white"
+                }`}
+              >
+                {cycle === "six_months"
+                  ? "6 Months"
+                  : cycle.charAt(0).toUpperCase() + cycle.slice(1)}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* Pricing Card */}
-        <div className="bg-white/5 border border-white/10 rounded-2xl p-10 backdrop-blur-xl">
+        <div className="relative bg-white/5 border border-white/10 rounded-3xl p-8 sm:p-12 backdrop-blur-xl shadow-2xl">
 
           {billingCycle === "yearly" && (
-            <div className="mb-4 text-green-400 text-sm font-medium">
-              Best Value 🔥
+            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-green-500 text-black text-xs font-semibold px-4 py-1 rounded-full shadow-md">
+              BEST VALUE
             </div>
           )}
 
-          <div className="text-5xl font-semibold">
+          <div className="text-4xl sm:text-6xl font-semibold tracking-tight">
             {pricing[billingCycle].price}
             <span className="text-gray-400 text-lg ml-2">
               {pricing[billingCycle].label}
             </span>
           </div>
 
-          <ul className="mt-8 space-y-4 text-gray-300 text-left max-w-sm mx-auto">
-            <li className="flex gap-3">
-              <Check className="w-4 h-4 mt-1" />
+          <ul className="mt-10 space-y-4 text-gray-300 text-left max-w-sm mx-auto">
+            <li className="flex items-start gap-3">
+              <Check className="w-5 h-5 text-green-400 mt-1" />
               Unlimited Members
             </li>
-            <li className="flex gap-3">
-              <Check className="w-4 h-4 mt-1" />
+            <li className="flex items-start gap-3">
+              <Check className="w-5 h-5 text-green-400 mt-1" />
               Automated Renewal Reminders
             </li>
-            <li className="flex gap-3">
-              <Check className="w-4 h-4 mt-1" />
+            <li className="flex items-start gap-3">
+              <Check className="w-5 h-5 text-green-400 mt-1" />
               Revenue Dashboard
             </li>
-            <li className="flex gap-3">
-              <Check className="w-4 h-4 mt-1" />
+            <li className="flex items-start gap-3">
+              <Check className="w-5 h-5 text-green-400 mt-1" />
               Priority Support
             </li>
           </ul>
 
+          {/* CTA */}
           <button
             disabled={loading}
             onClick={handleSubscribe}
-            className="mt-10 w-full bg-white text-black py-3 rounded-xl font-medium hover:bg-gray-200 disabled:opacity-60"
+            className="mt-12 w-full bg-white text-black py-3 sm:py-4 rounded-xl font-semibold text-sm sm:text-base transition-all duration-300 hover:bg-gray-200 hover:scale-[1.02] active:scale-[0.98] disabled:opacity-60 shadow-lg"
           >
-            {loading ? "Processing..." : "Subscribe Now"}
+            {loading ? "Processing..." : "Start Pro Membership"}
           </button>
 
+          <p className="text-xs text-gray-500 mt-4">
+            Cancel anytime. Secure payments powered by Razorpay.
+          </p>
         </div>
       </div>
     </div>
