@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Same-origin: dev uses Vite proxy, production uses Netlify proxy (netlify.toml).
 // No cross-origin = no CORS issues on mobile.
-const baseURL = "https://unique-enthusiasm-production.up.railway.app";
+const baseURL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
 export const api = axios.create({
   baseURL,
