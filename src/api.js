@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Same-origin: dev uses Vite proxy, production uses Netlify proxy (netlify.toml).
 // No cross-origin = no CORS issues on mobile.
-const baseURL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+const baseURL = "/api"; // Force proxy usage for mobile fix
 
 console.log("API Base URL:", baseURL); // Debug logging
 //yeah 
