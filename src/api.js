@@ -4,6 +4,8 @@ import axios from "axios";
 // No cross-origin = no CORS issues on mobile.
 const baseURL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
 
+console.log("API Base URL:", baseURL); // Debug logging
+
 export const api = axios.create({
   baseURL,
   headers: { "Content-Type": "application/json" },

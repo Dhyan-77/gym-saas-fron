@@ -65,7 +65,14 @@ export default function Login() {
     setConnectionCheck({ status: "checking", url: displayUrl });
     try {
       const healthUrl = url ? `${url.replace(/\/$/, "")}/api/health/` : "/api/health/";
-      const res = await fetch(healthUrl, { method: "GET" });
+      console.log("Testing URL:", healthUrl); // Mobile debug
+      const res = await fetch(healthUrl, { 
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      console.log("Response status:", res.status); // Mobile debug
       if (res.ok) {
         setConnectionCheck({
           status: "ok",
@@ -81,6 +88,8 @@ export default function Login() {
       }
     } catch (e) {
       const msg = e?.message || String(e);
+      console.log("Connection error:", msg); // Mobile debug
+      console.log("User agent:", navigator.userAgent); // Mobile debug
       setConnectionCheck({
         status: "error",
         url: displayUrl,
