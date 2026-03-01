@@ -2,7 +2,7 @@ import axios from "axios";
 
 // Same-origin: dev uses Vite proxy, production uses Netlify proxy (netlify.toml).
 // No cross-origin = no CORS issues on mobile.
-const baseURL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+const baseURL = "";
 
 console.log("API Base URL:", baseURL); // Debug logging
 
@@ -13,6 +13,17 @@ export const api = axios.create({
 });
 
 export const getApiBaseURL = () => baseURL;
+
+
+// ✅ attach JWT automatically
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem("access");
+  if (token) {
+    config.headers = config.headers || {};
+    config.headers.Authorization = `Bearer ${token}`;
+  }
+  return config;
+});
 
 api.interceptors.response.use(
   (res) => res,

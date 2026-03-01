@@ -42,7 +42,7 @@ export default function Pricing() {
         theme: { color: "#111111" },
         handler: function () {
           setTimeout(() => {
-  window.location.href = "/dashboard";
+  window.location.href = "/admin";
 }, 1500);
         },
       };

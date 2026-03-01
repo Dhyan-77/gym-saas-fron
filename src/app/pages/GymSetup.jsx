@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { Dumbbell, MapPin } from "lucide-react";
 import { api } from "../../api";
 import { setActiveGymId } from "../../utils/gym";

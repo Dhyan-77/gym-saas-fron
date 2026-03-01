@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link, useLocation, useNavigate } from "react-router";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { api } from "../../api";
 import { getActiveGymId, setActiveGymId as saveActiveGymId } from "../../utils/gym";
 

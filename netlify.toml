@@ -5,6 +5,12 @@
   status = 200
   force = true
 
+
+  [[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
 # index.html: no-cache so mobile picks up new deploy
 [[headers]]
   for = "/index.html"
