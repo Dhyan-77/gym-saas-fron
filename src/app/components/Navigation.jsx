@@ -95,7 +95,6 @@ export default function Navigation() {
       try {
         const token = localStorage.getItem("access");
         if (!token) {
-          // user not logged in, don't call protected API
           if (!mounted) return;
           setGyms([]);
           setActiveGymIdState("");
@@ -153,113 +152,189 @@ export default function Navigation() {
     navigate("/");
   };
 
+  const isActivePath = (path) => location.pathname === path;
+
   return (
-    <nav className="bg-white/5 backdrop-blur-xl border-b border-white/10 sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          {/* Logo */}
-          <Link to="/admin" className="flex items-center gap-2">
-            <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 bg-white/10 rounded-lg">
-              <Dumbbell className="w-5 h-5 text-white" />
-            </div>
-            <span className="text-lg sm:text-xl bg-gradient-to-r from-white to-gray-400 bg-clip-text text-transparent">
-              GymFlow
-            </span>
-          </Link>
+    <nav className="sticky top-0 z-50">
+      {/* Inline styles (same look as the dashboard glass) */}
+      <style>{`
+        .nav-glass{
+          background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
+          border-bottom: 1px solid rgba(255,255,255,.10);
+          backdrop-filter: blur(18px);
+          -webkit-backdrop-filter: blur(18px);
+        }
+        .nav-shine{
+          position: relative;
+          overflow: hidden;
+        }
+        .nav-shine:before{
+          content:"";
+          position:absolute;
+          inset:-2px;
+          background: radial-gradient(900px 220px at 14% 0%, rgba(255,255,255,.14), transparent 55%),
+                      radial-gradient(700px 220px at 90% 10%, rgba(255,255,255,.10), transparent 60%);
+          pointer-events:none;
+        }
+        .nav-pill{
+          border: 1px solid rgba(255,255,255,.10);
+          background: rgba(255,255,255,.04);
+        }
+        .nav-pill:hover{ background: rgba(255,255,255,.07); }
+        .nav-pill-active{
+          background: rgba(255,255,255,.10);
+          border: 1px solid rgba(255,255,255,.14);
+          box-shadow: 0 10px 22px rgba(0,0,0,.35);
+        }
+        .ios-chip{
+          background: rgba(34,197,94,.18);
+          border: 1px solid rgba(34,197,94,.28);
+          color: rgba(187,255,214,1);
+          backdrop-filter: blur(14px);
+          -webkit-backdrop-filter: blur(14px);
+        }
+        .ios-iconbtn{
+          border: 1px solid rgba(255,255,255,.12);
+          background: rgba(255,255,255,.05);
+        }
+        .ios-iconbtn:hover{ background: rgba(255,255,255,.08); }
+        .ios-panel{
+          background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
+          border: 1px solid rgba(255,255,255,.12);
+          box-shadow: 0 18px 50px rgba(0,0,0,.55);
+          backdrop-filter: blur(22px);
+          -webkit-backdrop-filter: blur(22px);
+        }
+        .ios-select{
+          background: rgba(255,255,255,.06);
+          border: 1px solid rgba(255,255,255,.12);
+          color: white;
+        }
+        .ios-select:focus{
+          outline: none;
+          box-shadow: 0 0 0 2px rgba(255,255,255,.10);
+          border-color: rgba(255,255,255,.22);
+        }
+      `}</style>
 
-          {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.path;
-
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`flex items-center gap-2 px-3 lg:px-4 py-2 rounded-lg transition-all duration-200 ${
-                    isActive
-                      ? "bg-white/10 text-white"
-                      : "text-gray-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
-          </div>
-
-          {/* ✅ PRO Badge */}
-          {sub?.status === "active" && (
-            <span className="hidden md:inline-flex bg-green-500 text-black px-3 py-1 rounded-full text-xs font-semibold">
-              PRO • {sub?.days_remaining ?? 0} days left
-            </span>
-          )}
-
-          {/* Desktop Right Side: Gym switcher + Logout */}
-          <div className="hidden md:flex items-center gap-3">
-            {showGymSwitcher && (
-              <div className="flex items-center gap-2">
-                <Building2 className="w-4 h-4 text-gray-400" />
-
-                <select
-                  value={activeGymId}
-                  onChange={handleGymChange}
-                  disabled={gymLoading || gyms.length === 0}
-                  className="px-3 py-2 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/30 disabled:opacity-60"
-                  title={gymError || "Select gym"}
-                >
-                  {gymLoading && <option value="">Loading gyms…</option>}
-
-                  {!gymLoading && gyms.length === 0 && (
-                    <option value="">No gym found</option>
-                  )}
-
-                  {!gymLoading &&
-                    gyms.map((g) => (
-                      <option key={g.id} value={g.id}>
-                        {g.name || "Unnamed Gym"}
-                      </option>
-                    ))}
-                </select>
-
-                <Link
-                  to="/gym-setup"
-                  className="flex items-center gap-1.5 px-3 py-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl text-white text-sm transition"
-                  title="Add new gym"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add gym</span>
-                </Link>
+      <div className="nav-glass nav-shine">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link to="/admin" className="flex items-center gap-2">
+              <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-2xl border border-white/10 bg-white/[0.06]">
+                <Dumbbell className="w-5 h-5 text-white" />
               </div>
+              <span className="text-lg sm:text-xl font-semibold tracking-[-0.02em]">
+                <span className="bg-gradient-to-b from-white via-white/85 to-white/55 bg-clip-text text-transparent">
+                  GymFlow
+                </span>
+              </span>
+            </Link>
+
+            {/* Desktop Nav */}
+            <div className="hidden md:flex items-center gap-2">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const active = isActivePath(item.path);
+
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`flex items-center gap-2 px-3.5 lg:px-4 py-2 rounded-2xl transition-all duration-200 ${
+                      active
+                        ? "nav-pill-active text-white"
+                        : "nav-pill text-white/70 hover:text-white"
+                    }`}
+                  >
+                    <Icon className={`w-4 h-4 ${active ? "opacity-100" : "opacity-80"}`} />
+                    <span className="text-sm">{item.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* ✅ PRO Badge */}
+            {sub?.status === "active" && (
+              <span className="hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ios-chip">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
+                PRO • {sub?.days_remaining ?? 0} days left
+              </span>
             )}
 
+            {/* Desktop Right Side: Gym switcher + Logout */}
+            <div className="hidden md:flex items-center gap-3">
+              {showGymSwitcher && (
+                <div className="flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-white/60" />
+
+                  <select
+                    value={activeGymId}
+                    onChange={handleGymChange}
+                    disabled={gymLoading || gyms.length === 0}
+                    className="px-3 py-2 rounded-2xl text-sm ios-select disabled:opacity-60"
+                    title={gymError || "Select gym"}
+                  >
+                    {gymLoading && <option value="">Loading gyms…</option>}
+
+                    {!gymLoading && gyms.length === 0 && (
+                      <option value="">No gym found</option>
+                    )}
+
+                    {!gymLoading &&
+                      gyms.map((g) => (
+                        <option key={g.id} value={g.id}>
+                          {g.name || "Unnamed Gym"}
+                        </option>
+                      ))}
+                  </select>
+
+                  <Link
+                    to="/gym-setup"
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-2xl ios-iconbtn text-white text-sm transition"
+                    title="Add new gym"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add gym</span>
+                  </Link>
+                </div>
+              )}
+
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-3 py-2 rounded-2xl text-white/70 hover:text-white transition-colors nav-pill"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="text-sm">Logout</span>
+              </button>
+            </div>
+
+            {/* Mobile Menu Button */}
             <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 text-gray-400 hover:text-white transition-colors"
+              onClick={() => setOpen(!open)}
+              className="md:hidden p-2 rounded-2xl ios-iconbtn"
+              aria-label="Open menu"
             >
-              <LogOut className="w-4 h-4" />
-              <span>Logout</span>
+              {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
-
-          {/* Mobile Menu Button */}
-          <button
-            onClick={() => setOpen(!open)}
-            className="md:hidden p-2 rounded-lg bg-white/5 border border-white/10"
-          >
-            {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-          </button>
         </div>
+      </div>
 
-        {/* Mobile Dropdown */}
-        {open && (
-          <div className="md:hidden pb-4 space-y-2">
+      {/* Mobile Overlay Panel (premium iOS style) */}
+      {open && (
+        <div className="md:hidden">
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
+            onClick={() => setOpen(false)}
+          />
+          <div className="fixed left-3 right-3 top-[76px] z-50 ios-panel rounded-3xl p-3">
             {/* ✅ Mobile PRO Badge */}
             {sub?.status === "active" && (
-              <div className="px-4 pt-2">
-                <span className="inline-flex bg-green-500 text-black px-3 py-1 rounded-full text-xs font-semibold">
+              <div className="px-2 pt-1 pb-2">
+                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ios-chip">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
                   PRO • {sub?.days_remaining ?? 0} days left
                 </span>
               </div>
@@ -267,8 +342,8 @@ export default function Navigation() {
 
             {/* Mobile Gym Switcher */}
             {showGymSwitcher && (
-              <div className="px-2">
-                <div className="text-xs text-gray-400 mb-2 flex items-center gap-2">
+              <div className="px-2 pb-2">
+                <div className="text-[11px] uppercase tracking-wide text-white/55 mb-2 flex items-center gap-2">
                   <Building2 className="w-4 h-4" />
                   Select Gym
                 </div>
@@ -277,7 +352,7 @@ export default function Navigation() {
                   value={activeGymId}
                   onChange={handleGymChange}
                   disabled={gymLoading || gyms.length === 0}
-                  className="w-full px-3 py-3 bg-white/5 border border-white/10 rounded-xl text-white text-sm focus:outline-none focus:ring-2 focus:ring-white/30 disabled:opacity-60"
+                  className="w-full px-3 py-3 rounded-2xl text-sm ios-select disabled:opacity-60"
                 >
                   {gymLoading && <option value="">Loading gyms…</option>}
 
@@ -296,51 +371,55 @@ export default function Navigation() {
                 <Link
                   to="/gym-setup"
                   onClick={() => setOpen(false)}
-                  className="flex items-center gap-2 mt-2 px-3 py-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl text-white text-sm transition"
+                  className="flex items-center justify-center gap-2 mt-2 px-3 py-3 rounded-2xl ios-iconbtn text-white text-sm transition"
                 >
                   <Plus className="w-4 h-4" />
                   <span>Add new gym</span>
                 </Link>
 
                 {gymError ? (
-                  <div className="mt-2 text-xs text-red-300 whitespace-pre-line">
+                  <div className="mt-2 text-xs text-red-200/90 whitespace-pre-line">
                     {gymError}
                   </div>
                 ) : null}
+
+                <div className="my-3 h-px bg-white/10" />
               </div>
             )}
 
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = location.pathname === item.path;
+            <div className="space-y-1 px-1">
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const active = isActivePath(item.path);
 
-              return (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  onClick={() => setOpen(false)}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-lg transition-all duration-200 ${
-                    isActive
-                      ? "bg-white/10 text-white"
-                      : "text-gray-400 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
-                  <span>{item.label}</span>
-                </Link>
-              );
-            })}
+                return (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setOpen(false)}
+                    className={`flex items-center gap-3 px-3 py-3 rounded-2xl transition-all duration-200 ${
+                      active
+                        ? "nav-pill-active text-white"
+                        : "nav-pill text-white/75 hover:text-white"
+                    }`}
+                  >
+                    <Icon className="w-5 h-5" />
+                    <span className="text-sm">{item.label}</span>
+                  </Link>
+                );
+              })}
 
-            <button
-              onClick={handleLogout}
-              className="w-full flex items-center gap-3 px-4 py-3 text-gray-400 hover:text-white transition-colors"
-            >
-              <LogOut className="w-5 h-5" />
-              <span>Logout</span>
-            </button>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl nav-pill text-white/75 hover:text-white transition-colors"
+              >
+                <LogOut className="w-5 h-5" />
+                <span className="text-sm">Logout</span>
+              </button>
+            </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </nav>
   );
 }
