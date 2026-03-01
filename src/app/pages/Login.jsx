@@ -100,41 +100,69 @@ export default function Login() {
     }
   };
 
-  return (
-    <div className="relative min-h-[100svh] bg-black text-white flex items-center justify-center px-4 py-10">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-6 w-64 h-64 bg-purple-600/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-6 w-64 h-64 bg-blue-600/20 rounded-full blur-3xl" />
-      </div>
+return (
+  <div className="relative min-h-[100svh] bg-[#05060a] text-white flex items-center justify-center px-4 py-10 overflow-hidden">
+    {/* Background: premium iOS glass + glow mesh */}
+    <div className="absolute inset-0 pointer-events-none">
+      {/* glow blobs */}
+      <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-fuchsia-500/25 blur-3xl" />
+      <div className="absolute top-1/3 -right-28 h-80 w-80 rounded-full bg-sky-400/20 blur-3xl" />
+      <div className="absolute -bottom-24 left-1/4 h-80 w-80 rounded-full bg-violet-500/15 blur-3xl" />
 
-      <div className="w-full max-w-md relative z-10">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-white/10 rounded-2xl mb-4 backdrop-blur-md shadow-lg">
-            <Dumbbell className="w-8 h-8 text-white" />
-          </div>
+      {/* subtle vignette */}
+      <div className="absolute inset-0 bg-[radial-gradient(1200px_800px_at_50%_10%,rgba(255,255,255,0.08),transparent_55%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(900px_700px_at_50%_100%,rgba(0,0,0,0.55),transparent_60%)]" />
+    </div>
 
-          <h1 className="text-3xl font-semibold bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
-            GymFlow
-          </h1>
-
-          <p className="text-sm text-gray-400 mt-1">Manage your gym with ease</p>
+    <div className="w-full max-w-[420px] relative z-10">
+      {/* Header */}
+      <div className="text-center mb-7">
+        <div className="mx-auto inline-flex items-center justify-center w-16 h-16 rounded-[22px]
+                        bg-white/10 border border-white/12 backdrop-blur-xl shadow-[0_16px_50px_rgba(0,0,0,0.45)]
+                        ring-1 ring-white/10">
+          <Dumbbell className="w-8 h-8 text-white" />
         </div>
 
-        <div className="bg-white/5 backdrop-blur-2xl border border-white/10 rounded-3xl p-6 shadow-2xl">
-          <h2 className="text-2xl font-semibold mb-6 text-center">
+        <h1 className="mt-4 text-[28px] leading-tight font-semibold tracking-[-0.02em]
+                       bg-gradient-to-b from-white via-white/90 to-white/55 bg-clip-text text-transparent">
+          GymFlow
+        </h1>
+        <p className="mt-1 text-[13px] text-white/55">
+          Manage your gym with ease
+        </p>
+      </div>
+
+      {/* Glass Card */}
+      <div
+        className="relative rounded-[28px] p-[18px]
+                   bg-white/[0.07] border border-white/[0.12] backdrop-blur-2xl
+                   shadow-[0_24px_80px_rgba(0,0,0,0.55)]
+                   ring-1 ring-white/10"
+      >
+        {/* inner highlight */}
+        <div className="absolute inset-0 rounded-[28px] pointer-events-none
+                        bg-[linear-gradient(135deg,rgba(255,255,255,0.20),rgba(255,255,255,0.02),rgba(255,255,255,0.06))]
+                        opacity-60" />
+        <div className="relative">
+          <h2 className="text-[22px] font-semibold tracking-[-0.01em] text-center">
             Welcome Back
           </h2>
+          <p className="mt-1 text-center text-[13px] text-white/50">
+            Sign in to continue
+          </p>
 
           {error && (
-            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 text-sm break-words whitespace-pre-line">
+            <div className="mt-5 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-400/25 text-rose-100 text-[13px] break-words whitespace-pre-line">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4.5">
+            {/* Email */}
             <div>
-              <label className="block text-sm text-gray-300 mb-2">
-                Email Address
+              <label className="block text-[12px] font-medium text-white/65 mb-2">
+                Email
               </label>
               <input
                 type="email"
@@ -142,14 +170,20 @@ export default function Login() {
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3.5 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-transparent transition-all"
+                className="w-full px-4 py-3.5 rounded-2xl
+                           bg-white/[0.06] border border-white/[0.10]
+                           text-white placeholder-white/35
+                           shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]
+                           focus:outline-none focus:ring-2 focus:ring-white/25 focus:border-white/20
+                           transition"
                 placeholder="you@example.com"
                 required
               />
             </div>
 
+            {/* Password */}
             <div>
-              <label className="block text-sm text-gray-300 mb-2">
+              <label className="block text-[12px] font-medium text-white/65 mb-2">
                 Password
               </label>
 
@@ -159,7 +193,12 @@ export default function Login() {
                   autoComplete="current-password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3.5 pr-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-white/40 focus:border-transparent transition-all"
+                  className="w-full px-4 py-3.5 pr-[88px] rounded-2xl
+                             bg-white/[0.06] border border-white/[0.10]
+                             text-white placeholder-white/35
+                             shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]
+                             focus:outline-none focus:ring-2 focus:ring-white/25 focus:border-white/20
+                             transition"
                   placeholder="••••••••"
                   required
                 />
@@ -167,41 +206,66 @@ export default function Login() {
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm"
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2
+                             px-3 py-1.5 rounded-full text-[12px] font-medium
+                             bg-white/10 border border-white/10 text-white/80
+                             hover:bg-white/14 active:scale-[0.98]
+                             transition"
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
               </div>
             </div>
 
+            {/* Primary button */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 rounded-xl font-medium bg-gradient-to-r from-white to-gray-300 text-black transition-all duration-200 shadow-lg hover:shadow-xl active:scale-[0.98] disabled:opacity-60"
+              className="w-full mt-1 py-3.5 rounded-2xl font-semibold text-[14px] text-black
+                         bg-[linear-gradient(180deg,#ffffff_0%,#f1f5f9_55%,#e2e8f0_100%)]
+                         shadow-[0_14px_40px_rgba(0,0,0,0.55)]
+                         hover:shadow-[0_18px_60px_rgba(0,0,0,0.60)]
+                         active:scale-[0.985] active:shadow-[0_10px_30px_rgba(0,0,0,0.55)]
+                         disabled:opacity-60 disabled:active:scale-100
+                         transition"
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-gray-400">
+          {/* Footer actions */}
+          <div className="mt-6 text-center text-[13px] text-white/55">
             Don’t have an account?{" "}
-            <Link to="/signup" className="text-white hover:underline">
+            <Link
+              to="/signup"
+              className="text-white/90 hover:text-white underline-offset-4 hover:underline"
+            >
               Sign up
             </Link>
           </div>
 
-          <div className="mt-4 pt-4 border-t border-white/10">
+          {/* Connection check */}
+          <div className="mt-5 pt-5 border-t border-white/10">
             <button
               type="button"
               onClick={checkConnection}
-              className="text-xs text-gray-500 hover:text-gray-300 w-full text-center"
+              className="w-full text-center text-[12px] text-white/45 hover:text-white/70 transition"
             >
               Check connection
             </button>
+
             {connectionCheck && (
-              <div className="mt-2 p-2 rounded-lg bg-white/5 text-xs text-left whitespace-pre-line">
-                <div className="text-gray-400">API: {connectionCheck.url}</div>
-                <div className={connectionCheck.status === "ok" ? "text-green-400 mt-1" : "text-amber-400 mt-1"}>
+              <div className="mt-3 p-3 rounded-2xl bg-white/[0.06] border border-white/[0.10] text-[12px] whitespace-pre-line">
+                <div className="text-white/50">API: {connectionCheck.url}</div>
+                <div
+                  className={
+                    connectionCheck.status === "ok"
+                      ? "text-emerald-300 mt-1"
+                      : connectionCheck.status === "checking"
+                      ? "text-white/70 mt-1"
+                      : "text-amber-300 mt-1"
+                  }
+                >
                   {connectionCheck.status === "checking"
                     ? "Checking..."
                     : connectionCheck.message}
@@ -210,9 +274,11 @@ export default function Login() {
             )}
           </div>
         </div>
-
-        
       </div>
+
+      {/* Tiny bottom hint spacing like iOS */}
+      <div className="h-6" />
     </div>
-  );
+  </div>
+);
 }

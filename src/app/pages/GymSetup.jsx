@@ -13,11 +13,12 @@ export default function GymSetup() {
   const [formData, setFormData] = useState({
     gymName: "",
     address: "",
+    addressLine1: "",
     city: "",
     state: "",
     zipCode: "",
-    phone: "",
-    email: "",
+    latitude: null,
+longitude: null,
   });
 
   // Detect if user already has gyms (add another vs first-time setup)
@@ -72,152 +73,356 @@ export default function GymSetup() {
     }
   };
 
-  return (
-    <div className="min-h-screen bg-black text-white p-4 relative">
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-72 h-72 bg-purple-600/20 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-72 h-72 bg-blue-600/20 rounded-full blur-3xl" />
-      </div>
 
-      <div className="max-w-2xl mx-auto pt-12 pb-20 relative z-10">
-        <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-14 h-14 bg-white/10 rounded-2xl mb-4 backdrop-blur-sm">
-            <Dumbbell className="w-7 h-7 text-white" />
-          </div>
+  const [showManualAddress, setShowManualAddress] = useState(false);
 
-          <h1 className="text-3xl sm:text-4xl mb-2 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
-            {hasExistingGyms ? "Add another gym" : "Setup Your Gym"}
-          </h1>
+// Optional: store coords too (useful later)
+const handleUseCurrentLocation = async () => {
+  setError("");
+  if (!navigator.geolocation) {
+    setError("Location is not supported on this device.");
+    return;
+  }
 
-          <p className="text-gray-400 text-sm sm:text-base">
-            {hasExistingGyms
-              ? "Add a new gym to your account"
-              : "Add your gym details to get started"}
-          </p>
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      const { latitude, longitude } = pos.coords;
+
+      // For now: store a friendly string (no reverse geocoding needed).
+      // Later you can call a geocoding API to convert coords -> full address.
+      setFormData((prev) => ({
+        ...prev,
+        address: `Lat ${latitude.toFixed(5)}, Lng ${longitude.toFixed(5)}`,
+        latitude,
+        longitude,
+      }));
+    },
+    (err) => {
+      const msg =
+        err?.code === 1
+          ? "Location permission denied."
+          : "Could not fetch location. Try again.";
+      setError(msg);
+    },
+    { enableHighAccuracy: true, timeout: 12000, maximumAge: 60000 }
+  );
+};
+
+const handleSaveManualAddress = () => {
+  const parts = [
+    formData.addressLine1,
+    formData.city,
+    formData.zip,
+  ].filter(Boolean);
+
+  if (!parts.length) {
+    setError("Please enter your address first.");
+    return;
+  }
+
+  setFormData((prev) => ({
+    ...prev,
+    address: parts.join(", "),
+  }));
+  setShowManualAddress(false);
+};
+
+ return (
+  <div className="relative min-h-[100svh] bg-[#05060a] text-white flex items-center justify-center px-4 py-10 overflow-hidden">
+    {/* Background */}
+    <div className="absolute inset-0 pointer-events-none">
+      <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-fuchsia-500/25 blur-3xl" />
+      <div className="absolute top-1/3 -right-28 h-80 w-80 rounded-full bg-sky-400/20 blur-3xl" />
+      <div className="absolute -bottom-24 left-1/4 h-80 w-80 rounded-full bg-violet-500/15 blur-3xl" />
+      <div className="absolute inset-0 bg-[radial-gradient(1200px_800px_at_50%_10%,rgba(255,255,255,0.08),transparent_55%)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(900px_700px_at_50%_100%,rgba(0,0,0,0.55),transparent_60%)]" />
+    </div>
+
+    <div className="w-full max-w-[420px] relative z-10">
+      {/* Header */}
+      <div className="text-center mb-7">
+        <div
+          className="mx-auto inline-flex items-center justify-center w-16 h-16 rounded-[22px]
+                     bg-white/10 border border-white/12 backdrop-blur-xl
+                     shadow-[0_16px_50px_rgba(0,0,0,0.45)] ring-1 ring-white/10"
+        >
+          <Dumbbell className="w-8 h-8 text-white" />
         </div>
 
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-6 sm:p-8">
+        <h1 className="mt-4 text-[28px] leading-tight font-semibold tracking-[-0.02em]
+                       bg-gradient-to-b from-white via-white/90 to-white/55 bg-clip-text text-transparent">
+          GymFlow
+        </h1>
+        <p className="mt-1 text-[13px] text-white/55">
+          Create your gym profile in seconds
+        </p>
+      </div>
+
+      {/* Glass Card */}
+      <div
+        className="relative rounded-[28px] p-[18px]
+                   bg-white/[0.07] border border-white/[0.12] backdrop-blur-2xl
+                   shadow-[0_24px_80px_rgba(0,0,0,0.55)]
+                   ring-1 ring-white/10"
+      >
+        <div
+          className="absolute inset-0 rounded-[28px] pointer-events-none
+                     bg-[linear-gradient(135deg,rgba(255,255,255,0.20),rgba(255,255,255,0.02),rgba(255,255,255,0.06))]
+                     opacity-60"
+        />
+        <div className="relative">
+          <h2 className="text-[22px] font-semibold tracking-[-0.01em] text-center">
+            Create Account
+          </h2>
+          <p className="mt-1 text-center text-[13px] text-white/50">
+            Just the essentials — you can edit later
+          </p>
+
           {error && (
-            <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-sm">
+            <div className="mt-5 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-400/25 text-rose-100 text-[13px] break-words whitespace-pre-line">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4.5">
+            {/* Name */}
             <div>
-              <label className="block text-sm text-gray-300 mb-2">
-                Gym Name *
+              <label className="block text-[12px] font-medium text-white/65 mb-2">
+                Full name
               </label>
               <input
                 type="text"
-                value={formData.gymName}
-                onChange={(e) =>
-                  setFormData({ ...formData, gymName: e.target.value })
-                }
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-                placeholder="FitZone Gym"
+                autoComplete="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-4 py-3.5 rounded-2xl
+                           bg-white/[0.06] border border-white/[0.10]
+                           text-white placeholder-white/35
+                           shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]
+                           focus:outline-none focus:ring-2 focus:ring-white/25 focus:border-white/20
+                           transition"
+                placeholder="John Doe"
                 required
               />
             </div>
 
+            {/* Location block */}
+            <div className="rounded-2xl border border-white/10 bg-white/[0.05] p-3.5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-[12px] font-medium text-white/70">Address</div>
+                  <div className="mt-1 text-[12px] text-white/45 leading-relaxed">
+                    Use your current location or enter it manually.
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleUseCurrentLocation /* add handler below */}
+                  className="shrink-0 px-3 py-2 rounded-full text-[12px] font-semibold
+                             bg-white/10 border border-white/10 text-white/85
+                             hover:bg-white/14 active:scale-[0.98] transition"
+                >
+                  Use location
+                </button>
+              </div>
+
+              {/* Readonly preview (from GPS or manual) */}
+              <div className="mt-3">
+                <input
+                  type="text"
+                  value={formData.address || ""}
+                  readOnly
+                  className="w-full px-4 py-3 rounded-2xl
+                             bg-black/20 border border-white/10
+                             text-white/80 placeholder-white/30
+                             focus:outline-none"
+                  placeholder="No address selected yet"
+                />
+              </div>
+
+              {/* Manual toggle */}
+              <div className="mt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowManualAddress((v) => !v)}
+                  className="w-full text-left px-3 py-2 rounded-xl
+                             text-[12px] font-medium text-white/70
+                             hover:bg-white/[0.06] transition"
+                >
+                  {showManualAddress ? "Hide manual address" : "Enter address manually"}
+                </button>
+
+                {showManualAddress && (
+                  <div className="mt-2 space-y-2">
+                    <input
+                      type="text"
+                      value={formData.addressLine1 || ""}
+                      onChange={(e) => setFormData({ ...formData, addressLine1: e.target.value })}
+                      className="w-full px-4 py-3 rounded-2xl
+                                 bg-white/[0.06] border border-white/[0.10]
+                                 text-white placeholder-white/35
+                                 shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]
+                                 focus:outline-none focus:ring-2 focus:ring-white/25 focus:border-white/20
+                                 transition"
+                      placeholder="Street address"
+                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      <input
+                        type="text"
+                        value={formData.city || ""}
+                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                        className="w-full px-4 py-3 rounded-2xl
+                                   bg-white/[0.06] border border-white/[0.10]
+                                   text-white placeholder-white/35
+                                   shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]
+                                   focus:outline-none focus:ring-2 focus:ring-white/25 focus:border-white/20
+                                   transition"
+                        placeholder="City"
+                      />
+                      <input
+                        type="text"
+                        value={formData.zip || ""}
+                        onChange={(e) => setFormData({ ...formData, zip: e.target.value })}
+                        className="w-full px-4 py-3 rounded-2xl
+                                   bg-white/[0.06] border border-white/[0.10]
+                                   text-white placeholder-white/35
+                                   shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]
+                                   focus:outline-none focus:ring-2 focus:ring-white/25 focus:border-white/20
+                                   transition"
+                        placeholder="ZIP"
+                      />
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleSaveManualAddress /* add handler below */}
+                      className="w-full py-3 rounded-2xl text-[13px] font-semibold
+                                 bg-white/10 border border-white/10 text-white/85
+                                 hover:bg-white/14 active:scale-[0.985] transition"
+                    >
+                      Save manual address
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Password */}
             <div>
-              <label className="block text-sm text-gray-300 mb-2">
-                <MapPin className="w-4 h-4 inline mr-1" />
-                Street Address *
+              <label className="block text-[12px] font-medium text-white/65 mb-2">
+                Password
               </label>
-              <input
-                type="text"
-                value={formData.address}
-                onChange={(e) =>
-                  setFormData({ ...formData, address: e.target.value })
-                }
-                className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-                placeholder="123 Fitness Street"
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  minLength={8}
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  className="w-full px-4 py-3.5 pr-[88px] rounded-2xl
+                             bg-white/[0.06] border border-white/[0.10]
+                             text-white placeholder-white/35
+                             shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]
+                             focus:outline-none focus:ring-2 focus:ring-white/25 focus:border-white/20
+                             transition"
+                  placeholder="Minimum 8 characters"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2
+                             px-3 py-1.5 rounded-full text-[12px] font-medium
+                             bg-white/10 border border-white/10 text-white/80
+                             hover:bg-white/14 active:scale-[0.98]
+                             transition"
+                >
+                  {showPassword ? "Hide" : "Show"}
+                </button>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <input
-                type="text"
-                placeholder="City"
-                value={formData.city}
-                onChange={(e) =>
-                  setFormData({ ...formData, city: e.target.value })
-                }
-                className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-                required
-              />
-
-              <input
-                type="text"
-                placeholder="State"
-                value={formData.state}
-                onChange={(e) =>
-                  setFormData({ ...formData, state: e.target.value })
-                }
-                className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-                required
-              />
-
-              <input
-                type="text"
-                placeholder="ZIP Code"
-                value={formData.zipCode}
-                onChange={(e) =>
-                  setFormData({ ...formData, zipCode: e.target.value })
-                }
-                className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-                required
-              />
+            {/* Confirm Password */}
+            <div>
+              <label className="block text-[12px] font-medium text-white/65 mb-2">
+                Confirm password
+              </label>
+              <div className="relative">
+                <input
+                  type={showConfirmPassword ? "text" : "password"}
+                  autoComplete="new-password"
+                  minLength={8}
+                  value={formData.confirmPassword}
+                  onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                  className="w-full px-4 py-3.5 pr-[88px] rounded-2xl
+                             bg-white/[0.06] border border-white/[0.10]
+                             text-white placeholder-white/35
+                             shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]
+                             focus:outline-none focus:ring-2 focus:ring-white/25 focus:border-white/20
+                             transition"
+                  placeholder="Re-enter password"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2
+                             px-3 py-1.5 rounded-full text-[12px] font-medium
+                             bg-white/10 border border-white/10 text-white/80
+                             hover:bg-white/14 active:scale-[0.98]
+                             transition"
+                >
+                  {showConfirmPassword ? "Hide" : "Show"}
+                </button>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            {/* Terms */}
+            <div className="flex items-start gap-3">
               <input
-                type="tel"
-                placeholder="Phone Number"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-                className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
+                type="checkbox"
+                className="mt-1 h-5 w-5 rounded-md bg-white/[0.06] border border-white/20 accent-white"
+                required
               />
-
-              <input
-                type="email"
-                placeholder="Email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-                className="px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-              />
+              <label className="text-[13px] leading-relaxed text-white/55">
+                I agree to the{" "}
+                <a href="#" className="text-white/85 hover:text-white underline-offset-4 hover:underline">
+                  Terms
+                </a>{" "}
+                and{" "}
+                <a href="#" className="text-white/85 hover:text-white underline-offset-4 hover:underline">
+                  Privacy
+                </a>
+              </label>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-3 pt-4">
-              <button
-                type="button"
-                onClick={() => navigate(hasExistingGyms ? "/admin" : "/")}
-                className="w-full sm:flex-1 px-6 py-3 bg-white/5 border border-white/10 rounded-xl hover:bg-white/10 transition"
-              >
-                {hasExistingGyms ? "Back to Dashboard" : "Back"}
-              </button>
-
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full sm:flex-1 px-6 py-3 bg-white text-black rounded-xl hover:bg-gray-200 transition disabled:opacity-60"
-              >
-                {loading
-                  ? "Creating..."
-                  : hasExistingGyms
-                    ? "Add gym"
-                    : "Continue to Dashboard"}
-              </button>
-            </div>
+            {/* Primary */}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full mt-1 py-3.5 rounded-2xl font-semibold text-[14px] text-black
+                         bg-[linear-gradient(180deg,#ffffff_0%,#f1f5f9_55%,#e2e8f0_100%)]
+                         shadow-[0_14px_40px_rgba(0,0,0,0.55)]
+                         hover:shadow-[0_18px_60px_rgba(0,0,0,0.60)]
+                         active:scale-[0.985] active:shadow-[0_10px_30px_rgba(0,0,0,0.55)]
+                         disabled:opacity-60 disabled:active:scale-100 transition"
+            >
+              {loading ? "Creating..." : "Create Account"}
+            </button>
           </form>
+
+          <div className="mt-6 text-center text-[13px] text-white/55">
+            Already have an account?{" "}
+            <Link className="text-white/90 hover:text-white underline-offset-4 hover:underline" to="/">
+              Sign in
+            </Link>
+          </div>
         </div>
       </div>
+
+      <div className="h-6" />
     </div>
-  );
+  </div>
+);
 }
