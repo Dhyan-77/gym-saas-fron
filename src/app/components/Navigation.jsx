@@ -154,8 +154,7 @@ export default function Navigation() {
     setSub(null);
     setGyms([]);
     setActiveGymIdState("");
-
-    navigate("/");
+navigate("/login");
   };
 
   const isActivePath = (path) => location.pathname === path;

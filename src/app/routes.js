@@ -1,4 +1,5 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, Navigate } from "react-router-dom";
+
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import GymSetup from "./pages/GymSetup";
@@ -8,32 +9,20 @@ import Subscriptions from "./pages/Subscriptions";
 import Pricing from "./pages/Pricing";
 
 export const router = createBrowserRouter([
-  {
-    path: "/",
-    Component: Login,
-  },
-  {
-    path: "/signup",
-    Component: Signup,
-  },
-  {
-    path: "/gym-setup",
-    Component: GymSetup,
-  },
-  {
-    path: "/admin",
-    Component: AdminDashboard,
-  },
-  {
-    path: "/members",
-    Component: AllMembers,
-  },
-  {
-    path: "/subscriptions",
-    Component: Subscriptions,
-  },
-  {
-    path: "/pricing",
-    Component: Pricing,
-  },
+  // ✅ Make / go to /login (clean URLs)
+  { path: "/", element: <Navigate to="/login" replace /> },
+
+  // ✅ Real auth routes
+  { path: "/login", element: <Login /> },
+  { path: "/signup", element: <Signup /> },
+
+  // ✅ App routes
+  { path: "/gym-setup", element: <GymSetup /> },
+  { path: "/admin", element: <AdminDashboard /> },
+  { path: "/members", element: <AllMembers /> },
+  { path: "/subscriptions", element: <Subscriptions /> },
+  { path: "/pricing", element: <Pricing /> },
+
+  // ✅ Catch-all
+  { path: "*", element: <Navigate to="/login" replace /> },
 ]);

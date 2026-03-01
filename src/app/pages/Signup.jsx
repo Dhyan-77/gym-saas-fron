@@ -38,7 +38,7 @@ export default function Signup() {
     });
 
     // you DON'T auto-login in backend signup, so redirect to login
-    navigate("/");
+   navigate("/login");
   } catch (err) {
     const data = err?.response?.data;
     const msg =
