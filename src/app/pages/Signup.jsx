@@ -244,14 +244,7 @@ export default function Signup() {
             </div>
 
      <div className="flex items-start gap-3">
-  <input
-    id="agree"
-    type="checkbox"
-    required
-    className="mt-1 h-5 w-5 min-w-[20px] rounded-md
-               bg-white/[0.06] border border-white/20
-               accent-white"
-  />
+
 
 </div>
 
