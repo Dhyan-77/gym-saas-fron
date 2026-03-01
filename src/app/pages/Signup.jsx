@@ -252,16 +252,7 @@ export default function Signup() {
                            accent-white"
                 required
               />
-              <label className="text-[13px] leading-relaxed text-white/55">
-                I agree to the{" "}
-                <a href="#" className="text-white/85 hover:text-white underline-offset-4 hover:underline">
-                  Terms of Service
-                </a>{" "}
-                and{" "}
-                <a href="#" className="text-white/85 hover:text-white underline-offset-4 hover:underline">
-                  Privacy Policy
-                </a>
-              </label>
+              
             </div>
 
             {/* Primary */}
