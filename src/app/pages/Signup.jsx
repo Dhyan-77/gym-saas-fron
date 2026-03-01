@@ -243,17 +243,38 @@ export default function Signup() {
               </div>
             </div>
 
-            {/* Terms */}
-            <div className="flex items-start gap-3">
-              <input
-                type="checkbox"
-                className="mt-1 h-5 w-5 rounded-md
-                           bg-white/[0.06] border border-white/20
-                           accent-white"
-                required
-              />
-              
-            </div>
+     <div className="flex items-start gap-3">
+  <input
+    id="agree"
+    type="checkbox"
+    required
+    className="mt-1 h-5 w-5 min-w-[20px] rounded-md
+               bg-white/[0.06] border border-white/20
+               accent-white"
+  />
+{/* Terms */}
+  <label
+    htmlFor="agree"
+    className="text-[13px] leading-relaxed text-white/55 select-none"
+  >
+    I agree to the{" "}
+    <a
+      href="#"
+      onClick={(e) => e.stopPropagation()}
+      className="text-white/85 hover:text-white underline-offset-4 hover:underline"
+    >
+      Terms of Service
+    </a>{" "}
+    and{" "}
+    <a
+      href="#"
+      onClick={(e) => e.stopPropagation()}
+      className="text-white/85 hover:text-white underline-offset-4 hover:underline"
+    >
+      Privacy Policy
+    </a>
+  </label>
+</div>
 
             {/* Primary */}
             <button
