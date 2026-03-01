@@ -35,9 +35,14 @@ function parseError(err) {
   return err?.message || "Something went wrong";
 }
 
+
+
 export default function Navigation() {
   const location = useLocation();
   const navigate = useNavigate();
+
+    const hideNav = ["/login", "/signup"].includes(location.pathname);
+  if (hideNav) return null;
 
   const [open, setOpen] = useState(false);
 
@@ -55,6 +60,7 @@ export default function Navigation() {
     { path: "/members", label: "Members", icon: Users },
     { path: "/subscriptions", label: "Subscriptions", icon: Bell },
     { path: "/pricing", label: "Pricing", icon: DollarSign },
+    
   ];
 
   const showGymSwitcher = location.pathname !== "/pricing";
