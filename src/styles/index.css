@@ -1,3 +1,12 @@
 @import './fonts.css';
 @import './tailwind.css';
 @import './theme.css';
+html, body, #root {
+  height: 100%;
+  background: #05060a; /* deep premium black */
+}
+
+body {
+  margin: 0;
+  color: #fff;
+}
