@@ -14,50 +14,60 @@ export default function Login() {
   const [error, setError] = useState("");
   const [connectionCheck, setConnectionCheck] = useState(null);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-    setLoading(true);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError("");
+  setLoading(true);
 
-    try {
-      const normalizedEmail = email.trim().toLowerCase();
+  try {
+    const normalizedEmail = email.trim().toLowerCase();
 
-      // ✅ SimpleJWT login
-      const tokenRes = await api.post("/api/auth/login/", {
-        username: normalizedEmail,
-        password,
-      });
+    // Login
+    const tokenRes = await api.post("/api/auth/login/", {
+      username: normalizedEmail,
+      password,
+    });
 
-      const access = tokenRes.data?.access;
-      const refresh = tokenRes.data?.refresh;
+    const access = tokenRes?.data?.access;
+    const refresh = tokenRes?.data?.refresh;
 
-      if (!access) throw new Error("No access token returned from login API");
-
-      localStorage.setItem("access", access);
-      if (refresh) localStorage.setItem("refresh", refresh);
-
-      // ✅ Check if gym exists
-      const gymsRes = await api.get("/api/gyms/");
-      const gyms = Array.isArray(gymsRes.data) ? gymsRes.data : [];
-
-      navigate(gyms.length ? "/admin" : "/gym-setup");
-    } catch (err) {
-      const msg =
-        err?.userMessage ||
-        err?.response?.data?.detail ||
-        err?.response?.data?.message ||
-        err?.message ||
-        "Login failed";
-      const apiUrl = getApiBaseURL();
-      setError(
-        apiUrl && (msg.includes("Cannot reach") || err?.code === "ERR_NETWORK")
-          ? `${msg}\n\nAPI: ${apiUrl}`
-          : msg
-      );
-    } finally {
-      setLoading(false);
+    if (!access) {
+      throw new Error("No access token returned from login API");
     }
-  };
+
+    localStorage.setItem("access", access);
+    if (refresh) localStorage.setItem("refresh", refresh);
+
+    // 🏋️ Try fetching gyms (new users may not have one)
+    try {
+      const gymsRes = await api.get("/api/gyms/");
+      const gyms = Array.isArray(gymsRes?.data)
+        ? gymsRes.data
+        : [];
+
+      if (gyms.length > 0) {
+        navigate("/admin");
+      } else {
+        navigate("/gym-setup");
+      }
+    } catch (gymErr) {
+      // If gyms request fails (401/403/etc.)
+      // assume user has no gym yet
+      navigate("/gym-setup");
+    }
+
+  } catch (err) {
+    const msg =
+      err?.response?.data?.detail ||
+      err?.response?.data?.message ||
+      err?.message ||
+      "Login failed";
+
+    setError(msg);
+  } finally {
+    setLoading(false);
+  }
+};
 
   const checkConnection = async () => {
     const url = getApiBaseURL();
