@@ -23,10 +23,13 @@ export default function Login() {
     const normalizedEmail = email.trim().toLowerCase();
 
     // Login
-    const tokenRes = await api.post("/api/auth/login/", {
-      username: normalizedEmail,
-      password,
-    });
+ const tokenRes = await api.post("/api/auth/login/", {
+  username: normalizedEmail,
+  password,
+});
+
+console.log("Login status:", tokenRes.status);
+console.log("Login data:", tokenRes.data);
 
     const access = tokenRes?.data?.access;
     const refresh = tokenRes?.data?.refresh;
