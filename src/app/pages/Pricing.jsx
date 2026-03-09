@@ -8,10 +8,10 @@ export default function Pricing() {
   const [loading, setLoading] = useState(false);
 
   const PLAN_IDS = {
-    monthly: 1,
-    six_months: 2,
-    yearly: 3,
-    test_live: 4, // replace with actual DB id
+    monthly: "plan_SP045lZFPd1e46",
+    six_months: "plan_SP07mdabIB3dUp",
+    yearly: "plan_SP08GSI0cJ7ENU",
+    test_live: "plan_SP0IaZpv1X3ut4", // replace with actual DB id
   };
 
   const pricing = {
