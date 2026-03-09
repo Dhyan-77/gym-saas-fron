@@ -11,12 +11,14 @@ export default function Pricing() {
     monthly: 1,
     six_months: 2,
     yearly: 3,
+    test_live: 4, // replace with actual DB id
   };
 
   const pricing = {
     monthly: { price: "₹199", label: "/month", sub: "Billed monthly" },
     six_months: { price: "₹999", label: "/6 months", sub: "Save vs monthly" },
     yearly: { price: "₹1999", label: "/year", sub: "Best overall value" },
+    test_live: { price: "₹1", label: "/test", sub: "Live payment test only" },
   };
 
   const handleSubscribe = async () => {
@@ -61,11 +63,11 @@ export default function Pricing() {
     { key: "monthly", label: "Monthly" },
     { key: "six_months", label: "6 Months" },
     { key: "yearly", label: "Yearly" },
+    { key: "test_live", label: "₹1 Test" },
   ];
 
   return (
     <div className="min-h-screen text-white bg-[#050507] relative overflow-hidden">
-      {/* Premium background blobs */}
       <div className="pointer-events-none absolute inset-0">
         <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-fuchsia-500/20 blur-3xl" />
         <div className="absolute top-28 -right-20 h-80 w-80 rounded-full bg-cyan-400/15 blur-3xl" />
@@ -76,7 +78,6 @@ export default function Pricing() {
       <Navigation />
 
       <div className="relative mx-auto w-full max-w-md px-4 pb-14 pt-10 sm:max-w-lg sm:px-6 sm:pt-14">
-        {/* Header */}
         <div className="text-center">
           <h1 className="text-[28px] leading-tight sm:text-4xl font-semibold tracking-tight">
             Upgrade to{" "}
@@ -89,10 +90,9 @@ export default function Pricing() {
           </p>
         </div>
 
-        {/* iOS segmented control */}
         <div className="mt-8 flex justify-center">
           <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-xl p-1 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.8)]">
-            <div className="grid grid-cols-3 gap-1">
+            <div className="grid grid-cols-4 gap-1">
               {cycles.map((c) => {
                 const active = billingCycle === c.key;
                 return (
@@ -102,9 +102,7 @@ export default function Pricing() {
                     className={[
                       "relative isolate rounded-xl px-3 py-2 text-[12px] sm:text-sm font-medium transition",
                       "focus:outline-none focus-visible:ring-2 focus-visible:ring-white/30",
-                      active
-                        ? "text-black"
-                        : "text-white/70 hover:text-white",
+                      active ? "text-black" : "text-white/70 hover:text-white",
                     ].join(" ")}
                   >
                     {active && (
@@ -123,9 +121,7 @@ export default function Pricing() {
           </div>
         </div>
 
-        {/* Pricing Glass Card */}
         <div className="mt-8 relative">
-          {/* iOS-like floating badge */}
           {billingCycle === "yearly" && (
             <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
               <div className="rounded-full border border-emerald-300/30 bg-emerald-300/15 px-4 py-1 text-[11px] font-semibold tracking-wide text-emerald-100 backdrop-blur-xl shadow-[0_10px_30px_-18px_rgba(16,185,129,0.8)]">
@@ -134,15 +130,21 @@ export default function Pricing() {
             </div>
           )}
 
+          {billingCycle === "test_live" && (
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
+              <div className="rounded-full border border-yellow-300/30 bg-yellow-300/15 px-4 py-1 text-[11px] font-semibold tracking-wide text-yellow-100 backdrop-blur-xl">
+                LIVE TEST ONLY
+              </div>
+            </div>
+          )}
+
           <div className="relative overflow-hidden rounded-3xl border border-white/12 bg-white/[0.06] backdrop-blur-2xl shadow-[0_20px_70px_-35px_rgba(0,0,0,0.9)]">
-            {/* glass highlight */}
             <div className="pointer-events-none absolute inset-0">
               <div className="absolute -top-24 left-0 h-56 w-full rotate-6 bg-gradient-to-b from-white/18 via-white/6 to-transparent blur-xl" />
               <div className="absolute inset-0 rounded-3xl ring-1 ring-white/10" />
             </div>
 
             <div className="relative p-6 sm:p-8">
-              {/* Price row */}
               <div className="flex items-end justify-between gap-4">
                 <div>
                   <div className="text-[44px] leading-none sm:text-6xl font-semibold tracking-tight">
@@ -156,7 +158,6 @@ export default function Pricing() {
                   </p>
                 </div>
 
-                {/* tiny “pro” chip */}
                 <div className="shrink-0">
                   <div className="rounded-2xl border border-white/10 bg-white/5 px-3 py-2 text-[11px] text-white/70 backdrop-blur-xl">
                     <span className="font-semibold text-white/85">PRO</span>{" "}
@@ -165,10 +166,8 @@ export default function Pricing() {
                 </div>
               </div>
 
-              {/* Divider */}
               <div className="my-6 h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
 
-              {/* Features */}
               <ul className="space-y-3 text-sm sm:text-[15px] text-white/75">
                 {[
                   "Unlimited Members",
@@ -185,7 +184,6 @@ export default function Pricing() {
                 ))}
               </ul>
 
-              {/* CTA */}
               <button
                 disabled={loading}
                 onClick={handleSubscribe}
@@ -199,12 +197,15 @@ export default function Pricing() {
                   "relative overflow-hidden",
                 ].join(" ")}
               >
-                {/* subtle shine */}
                 <span className="pointer-events-none absolute inset-0">
                   <span className="absolute -top-10 left-1/2 h-24 w-56 -translate-x-1/2 rotate-12 bg-white/35 blur-2xl" />
                 </span>
                 <span className="relative">
-                  {loading ? "Processing..." : "Start Pro Membership"}
+                  {loading
+                    ? "Processing..."
+                    : billingCycle === "test_live"
+                    ? "Run ₹1 Live Test"
+                    : "Start Pro Membership"}
                 </span>
               </button>
 
@@ -214,7 +215,6 @@ export default function Pricing() {
             </div>
           </div>
 
-          {/* bottom subtle note card (optional premium touch) */}
           <div className="mt-4 rounded-2xl border border-white/10 bg-white/[0.04] backdrop-blur-xl p-4 text-xs text-white/60">
             <div className="flex items-start gap-3">
               <span className="mt-0.5 inline-flex h-6 w-6 items-center justify-center rounded-xl bg-white/5 border border-white/10">
@@ -227,7 +227,6 @@ export default function Pricing() {
           </div>
         </div>
 
-        {/* safe-bottom spacing for mobile */}
         <div className="h-6" />
       </div>
     </div>
