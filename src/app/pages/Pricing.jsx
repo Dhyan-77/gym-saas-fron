@@ -11,14 +11,12 @@ export default function Pricing() {
     monthly: 1,
     six_months: 3,
     yearly: 2,
-    // replace with actual DB id
   };
 
   const pricing = {
     monthly: { price: "₹199", label: "/month", sub: "Billed monthly" },
-    six_months: { price: "₹999", label: "/6 months", sub: "Save vs monthly" },
-    yearly: { price: "₹1999", label: "/year", sub: "Best overall value" },
-   
+    six_months: { price: "₹999", label: "/6 months", sub: "Save more than monthly" },
+    yearly: { price: "₹1999", label: "/year", sub: "Best value plan" },
   };
 
   const handleSubscribe = async () => {
@@ -63,7 +61,6 @@ export default function Pricing() {
     { key: "monthly", label: "Monthly" },
     { key: "six_months", label: "6 Months" },
     { key: "yearly", label: "Yearly" },
-    
   ];
 
   return (
@@ -86,13 +83,13 @@ export default function Pricing() {
             </span>
           </h1>
           <p className="mt-3 text-sm sm:text-base text-white/60">
-            Manage members, track revenue, automate renewals — built for serious gym owners.
+            Track members, renewals, and monthly collection in one place.
           </p>
         </div>
 
         <div className="mt-8 flex justify-center">
           <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/[0.06] backdrop-blur-xl p-1 shadow-[0_10px_30px_-12px_rgba(0,0,0,0.8)]">
-            <div className="grid grid-cols-4 gap-1">
+            <div className="grid grid-cols-3 gap-1">
               {cycles.map((c) => {
                 const active = billingCycle === c.key;
                 return (
@@ -130,14 +127,6 @@ export default function Pricing() {
             </div>
           )}
 
-          {billingCycle === "test_live" && (
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-              <div className="rounded-full border border-yellow-300/30 bg-yellow-300/15 px-4 py-1 text-[11px] font-semibold tracking-wide text-yellow-100 backdrop-blur-xl">
-                LIVE TEST ONLY
-              </div>
-            </div>
-          )}
-
           <div className="relative overflow-hidden rounded-3xl border border-white/12 bg-white/[0.06] backdrop-blur-2xl shadow-[0_20px_70px_-35px_rgba(0,0,0,0.9)]">
             <div className="pointer-events-none absolute inset-0">
               <div className="absolute -top-24 left-0 h-56 w-full rotate-6 bg-gradient-to-b from-white/18 via-white/6 to-transparent blur-xl" />
@@ -171,8 +160,8 @@ export default function Pricing() {
               <ul className="space-y-3 text-sm sm:text-[15px] text-white/75">
                 {[
                   "Unlimited Members",
-                  "Automated Renewal Reminders",
-                  "Revenue Dashboard",
+                  "Renewal Reminder Support",
+                  "Monthly Collection Tracking",
                   "Priority Support",
                 ].map((item) => (
                   <li key={item} className="flex items-start gap-3">
@@ -201,11 +190,7 @@ export default function Pricing() {
                   <span className="absolute -top-10 left-1/2 h-24 w-56 -translate-x-1/2 rotate-12 bg-white/35 blur-2xl" />
                 </span>
                 <span className="relative">
-                  {loading
-                    ? "Processing..."
-                    : billingCycle === "test_live"
-                    ? "Run ₹1 Live Test"
-                    : "Start Pro Membership"}
+                  {loading ? "Processing..." : "Start Pro Membership"}
                 </span>
               </button>
 
@@ -221,7 +206,7 @@ export default function Pricing() {
                 🔒
               </span>
               <p className="leading-relaxed">
-                Your subscription activates instantly after payment. You can manage billing anytime.
+                Your membership starts instantly after payment. You can manage billing anytime.
               </p>
             </div>
           </div>
