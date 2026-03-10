@@ -68,7 +68,7 @@ export default function Navigation() {
   const navItems = [
     { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { path: "/members", label: "Members", icon: Users },
-    { path: "/subscriptions", label: "Subscriptions", icon: Bell },
+    { path: "/subscriptions", label: "Members Status", icon: Bell },
     { path: "/pricing", label: "Pricing", icon: DollarSign },
   ];
 
