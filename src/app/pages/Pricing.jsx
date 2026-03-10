@@ -9,16 +9,16 @@ export default function Pricing() {
 
   const PLAN_IDS = {
     monthly: 1,
-    six_months: 2,
-    yearly: 3,
-    test_live: 4, // replace with actual DB id
+    six_months: 3,
+    yearly: 2,
+    // replace with actual DB id
   };
 
   const pricing = {
     monthly: { price: "₹199", label: "/month", sub: "Billed monthly" },
     six_months: { price: "₹999", label: "/6 months", sub: "Save vs monthly" },
     yearly: { price: "₹1999", label: "/year", sub: "Best overall value" },
-    test_live: { price: "₹1", label: "/test", sub: "Live payment test only" },
+   
   };
 
   const handleSubscribe = async () => {
