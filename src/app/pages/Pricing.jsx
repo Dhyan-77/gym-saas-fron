@@ -63,7 +63,7 @@ export default function Pricing() {
     { key: "monthly", label: "Monthly" },
     { key: "six_months", label: "6 Months" },
     { key: "yearly", label: "Yearly" },
-    { key: "test_live", label: "₹1 Test" },
+    
   ];
 
   return (
