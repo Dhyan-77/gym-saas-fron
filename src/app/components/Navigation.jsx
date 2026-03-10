@@ -35,13 +35,23 @@ function parseError(err) {
   return err?.message || "Something went wrong";
 }
 
+function getProBadgeText(sub) {
+  if (!sub?.is_active) return "";
 
+  const days = sub?.days_remaining ?? 0;
+
+  if (sub?.status === "cancelled") {
+    return `PRO • Ends in ${days} days`;
+  }
+
+  return `PRO • ${days} days left`;
+}
 
 export default function Navigation() {
   const location = useLocation();
   const navigate = useNavigate();
 
-    const hideNav = ["/login", "/signup"].includes(location.pathname);
+  const hideNav = ["/login", "/signup"].includes(location.pathname);
   if (hideNav) return null;
 
   const [open, setOpen] = useState(false);
@@ -52,7 +62,7 @@ export default function Navigation() {
   const [gymLoading, setGymLoading] = useState(true);
   const [gymError, setGymError] = useState("");
 
-  // ✅ subscription state (for PRO badge)
+  // subscription state
   const [sub, setSub] = useState(null);
 
   const navItems = [
@@ -60,12 +70,11 @@ export default function Navigation() {
     { path: "/members", label: "Members", icon: Users },
     { path: "/subscriptions", label: "Subscriptions", icon: Bell },
     { path: "/pricing", label: "Pricing", icon: DollarSign },
-    
   ];
 
   const showGymSwitcher = location.pathname !== "/pricing";
 
-  // ✅ Load subscription status (safe, won’t crash)
+  // Load subscription status
   useEffect(() => {
     let mounted = true;
 
@@ -79,7 +88,8 @@ export default function Navigation() {
 
         setSub(res.data);
       } catch (err) {
-        // ignore (401 etc.)
+        if (!mounted) return;
+        setSub(null);
       }
     }
 
@@ -90,7 +100,7 @@ export default function Navigation() {
     };
   }, []);
 
-  // ✅ Load gyms once
+  // Load gyms once
   useEffect(() => {
     let mounted = true;
 
@@ -134,12 +144,8 @@ export default function Navigation() {
   const handleGymChange = (e) => {
     const id = e.target.value;
 
-    // ✅ persist selection
     saveActiveGymId(id);
-
-    // ✅ update local state
     setActiveGymIdState(id);
-
     setOpen(false);
 
     // simplest + reliable so all pages re-fetch with new gym id
@@ -154,14 +160,14 @@ export default function Navigation() {
     setSub(null);
     setGyms([]);
     setActiveGymIdState("");
-navigate("/login");
+    navigate("/login");
   };
 
   const isActivePath = (path) => location.pathname === path;
+  const proBadgeText = getProBadgeText(sub);
 
   return (
     <nav className="sticky top-0 z-50">
-      {/* Inline styles (same look as the dashboard glass) */}
       <style>{`
         .nav-glass{
           background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
@@ -225,7 +231,6 @@ navigate("/login");
       <div className="nav-glass nav-shine">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16">
-            {/* Logo */}
             <Link to="/admin" className="flex items-center gap-2">
               <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-2xl border border-white/10 bg-white/[0.06]">
                 <Dumbbell className="w-5 h-5 text-white" />
@@ -237,7 +242,6 @@ navigate("/login");
               </span>
             </Link>
 
-            {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-2">
               {navItems.map((item) => {
                 const Icon = item.icon;
@@ -260,15 +264,13 @@ navigate("/login");
               })}
             </div>
 
-            {/* ✅ PRO Badge */}
-            {sub?.status === "active" && (
+            {sub?.is_active && (
               <span className="hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ios-chip">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
-                PRO • {sub?.days_remaining ?? 0} days left
+                {proBadgeText}
               </span>
             )}
 
-            {/* Desktop Right Side: Gym switcher + Logout */}
             <div className="hidden md:flex items-center gap-3">
               {showGymSwitcher && (
                 <div className="flex items-center gap-2">
@@ -315,7 +317,6 @@ navigate("/login");
               </button>
             </div>
 
-            {/* Mobile Menu Button */}
             <button
               onClick={() => setOpen(!open)}
               className="md:hidden p-2 rounded-2xl ios-iconbtn"
@@ -327,7 +328,6 @@ navigate("/login");
         </div>
       </div>
 
-      {/* Mobile Overlay Panel (premium iOS style) */}
       {open && (
         <div className="md:hidden">
           <div
@@ -335,17 +335,15 @@ navigate("/login");
             onClick={() => setOpen(false)}
           />
           <div className="fixed left-3 right-3 top-[76px] z-50 ios-panel rounded-3xl p-3">
-            {/* ✅ Mobile PRO Badge */}
-            {sub?.status === "active" && (
+            {sub?.is_active && (
               <div className="px-2 pt-1 pb-2">
                 <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ios-chip">
                   <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
-                  PRO • {sub?.days_remaining ?? 0} days left
+                  {proBadgeText}
                 </span>
               </div>
             )}
 
-            {/* Mobile Gym Switcher */}
             {showGymSwitcher && (
               <div className="px-2 pb-2">
                 <div className="text-[11px] uppercase tracking-wide text-white/55 mb-2 flex items-center gap-2">
