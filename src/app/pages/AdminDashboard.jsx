@@ -379,167 +379,169 @@ export default function AdminDashboard() {
           </button>
         </div>
 
-        <Drawer.Root open={showModal} onOpenChange={setShowModal}>
-          <Drawer.Portal>
-            <Drawer.Overlay className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm" />
+       <Drawer.Root open={showModal} onOpenChange={setShowModal}>
+  <Drawer.Portal>
+    <Drawer.Overlay className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm" />
 
-            <Drawer.Content className="fixed bottom-0 left-0 right-0 z-50 max-h-[92vh] overflow-y-auto rounded-t-[28px] border-t border-white/15 bg-[#161a22] shadow-[0_-20px_60px_rgba(0,0,0,0.55)]">
-              <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-white/20" />
+    <Drawer.Content className="fixed bottom-0 left-0 right-0 z-50 flex max-h-[92dvh] flex-col rounded-t-[28px] border-t border-white/15 bg-[#161a22] shadow-[0_-20px_60px_rgba(0,0,0,0.55)]">
+      <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-white/20" />
 
-              <div className="mx-auto max-w-xl p-5 pb-24 sm:p-6 sm:pb-28">
-                <div className="mb-6 flex items-start justify-between gap-4">
-                  <div>
-                    <h2 className="text-xl font-semibold text-white">
-                      {editingMember ? "Edit member" : "Add new member"}
-                    </h2>
-                    <p className="mt-1 text-sm text-white/55">
-                      Keep member details and renewal dates updated.
-                    </p>
-                  </div>
+      <div className="min-h-0 flex-1 overflow-y-auto">
+        <div className="mx-auto max-w-xl p-5 pb-24 sm:p-6 sm:pb-28">
+          <div className="mb-6 flex items-start justify-between gap-4">
+            <div>
+              <h2 className="text-xl font-semibold text-white">
+                {editingMember ? "Edit member" : "Add new member"}
+              </h2>
+              <p className="mt-1 text-sm text-white/55">
+                Keep member details and renewal dates updated.
+              </p>
+            </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/80 transition hover:bg-white/10"
-                  >
-                    <X size={18} />
-                  </button>
-                </div>
+            <button
+              type="button"
+              onClick={() => setShowModal(false)}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white/80 transition hover:bg-white/10"
+            >
+              <X size={18} />
+            </button>
+          </div>
 
-                {error && (
-                  <div className="mb-4 whitespace-pre-line rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-200">
-                    {error}
-                  </div>
-                )}
+          {error && (
+            <div className="mb-4 whitespace-pre-line rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-200">
+              {error}
+            </div>
+          )}
 
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-white/70">
-                      Full name
-                    </label>
-                    <input
-                      className="w-full rounded-xl border border-white/12 bg-[#202632] px-4 py-3 text-white placeholder-white/35 outline-none transition focus:border-white/25 focus:ring-2 focus:ring-white/10"
-                      placeholder="Enter member name"
-                      value={formData.name}
-                      onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
-                      }
-                      required
-                    />
-                  </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="mb-2 block text-sm font-medium text-white/70">
+                Full name
+              </label>
+              <input
+                className="w-full rounded-xl border border-white/12 bg-[#202632] px-4 py-3 text-white placeholder-white/35 outline-none transition focus:border-white/25 focus:ring-2 focus:ring-white/10"
+                placeholder="Enter member name"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                required
+              />
+            </div>
 
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-white/70">
-                      Phone number
-                    </label>
-                    <input
-                      className="w-full rounded-xl border border-white/12 bg-[#202632] px-4 py-3 text-white placeholder-white/35 outline-none transition focus:border-white/25 focus:ring-2 focus:ring-white/10"
-                      placeholder="Enter phone number"
-                      value={formData.phone}
-                      onChange={(e) =>
-                        setFormData({ ...formData, phone: e.target.value })
-                      }
-                    />
-                  </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-white/70">
+                Phone number
+              </label>
+              <input
+                className="w-full rounded-xl border border-white/12 bg-[#202632] px-4 py-3 text-white placeholder-white/35 outline-none transition focus:border-white/25 focus:ring-2 focus:ring-white/10"
+                placeholder="Enter phone number"
+                value={formData.phone}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
+              />
+            </div>
 
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-white/70">
-                      Plan
-                    </label>
-                    <select
-                      value={formData.plan}
-                      onChange={(e) =>
-                        setFormData({ ...formData, plan: e.target.value })
-                      }
-                      className="w-full rounded-xl border border-white/12 bg-[#202632] px-4 py-3 text-white outline-none transition focus:border-white/25 focus:ring-2 focus:ring-white/10"
-                    >
-                      <option value="monthly" className="bg-[#202632]">
-                        Monthly
-                      </option>
-                      <option value="yearly" className="bg-[#202632]">
-                        Yearly
-                      </option>
-                    </select>
-                  </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-white/70">
+                Plan
+              </label>
+              <select
+                value={formData.plan}
+                onChange={(e) =>
+                  setFormData({ ...formData, plan: e.target.value })
+                }
+                className="w-full rounded-xl border border-white/12 bg-[#202632] px-4 py-3 text-white outline-none transition focus:border-white/25 focus:ring-2 focus:ring-white/10"
+              >
+                <option value="monthly" className="bg-[#202632]">
+                  Monthly
+                </option>
+                <option value="yearly" className="bg-[#202632]">
+                  Yearly
+                </option>
+              </select>
+            </div>
 
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <DateField
-                      label="Start date"
-                      value={formData.start_date}
-                      onChange={(e) =>
-                        setFormData({ ...formData, start_date: e.target.value })
-                      }
-                      required
-                      inputRef={startDateRef}
-                    />
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <DateField
+                label="Start date"
+                value={formData.start_date}
+                onChange={(e) =>
+                  setFormData({ ...formData, start_date: e.target.value })
+                }
+                required
+                inputRef={startDateRef}
+              />
 
-                    <DateField
-                      label="Renewal date"
-                      value={formData.end_date}
-                      onChange={(e) =>
-                        setFormData({ ...formData, end_date: e.target.value })
-                      }
-                      required
-                      inputRef={endDateRef}
-                    />
-                  </div>
+              <DateField
+                label="Renewal date"
+                value={formData.end_date}
+                onChange={(e) =>
+                  setFormData({ ...formData, end_date: e.target.value })
+                }
+                required
+                inputRef={endDateRef}
+              />
+            </div>
 
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-white/70">
-                      Course / batch
-                    </label>
-                    <input
-                      className="w-full rounded-xl border border-white/12 bg-[#202632] px-4 py-3 text-white placeholder-white/35 outline-none transition focus:border-white/25 focus:ring-2 focus:ring-white/10"
-                      placeholder="Optional"
-                      value={formData.course_taken}
-                      onChange={(e) =>
-                        setFormData({ ...formData, course_taken: e.target.value })
-                      }
-                    />
-                  </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-white/70">
+                Course / batch
+              </label>
+              <input
+                className="w-full rounded-xl border border-white/12 bg-[#202632] px-4 py-3 text-white placeholder-white/35 outline-none transition focus:border-white/25 focus:ring-2 focus:ring-white/10"
+                placeholder="Optional"
+                value={formData.course_taken}
+                onChange={(e) =>
+                  setFormData({ ...formData, course_taken: e.target.value })
+                }
+              />
+            </div>
 
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-white/70">
-                      Offer / notes
-                    </label>
-                    <input
-                      className="w-full rounded-xl border border-white/12 bg-[#202632] px-4 py-3 text-white placeholder-white/35 outline-none transition focus:border-white/25 focus:ring-2 focus:ring-white/10"
-                      placeholder="Optional"
-                      value={formData.offer_taken}
-                      onChange={(e) =>
-                        setFormData({ ...formData, offer_taken: e.target.value })
-                      }
-                    />
-                  </div>
+            <div>
+              <label className="mb-2 block text-sm font-medium text-white/70">
+                Offer / notes
+              </label>
+              <input
+                className="w-full rounded-xl border border-white/12 bg-[#202632] px-4 py-3 text-white placeholder-white/35 outline-none transition focus:border-white/25 focus:ring-2 focus:ring-white/10"
+                placeholder="Optional"
+                value={formData.offer_taken}
+                onChange={(e) =>
+                  setFormData({ ...formData, offer_taken: e.target.value })
+                }
+              />
+            </div>
 
-                  <div className="sticky bottom-0 -mx-5 mt-6 border-t border-white/10 bg-[#161a22]/95 px-5 pb-5 pt-4 backdrop-blur-xl sm:-mx-6 sm:px-6">
-                    <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-                      <button
-                        type="button"
-                        onClick={() => setShowModal(false)}
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white/85 transition hover:bg-white/10 sm:w-auto"
-                      >
-                        Cancel
-                      </button>
+            <div className="sticky bottom-0 -mx-5 mt-6 border-t border-white/10 bg-[#161a22]/95 px-5 pb-5 pt-4 backdrop-blur-xl sm:-mx-6 sm:px-6">
+              <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowModal(false)}
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white/85 transition hover:bg-white/10 sm:w-auto"
+                >
+                  Cancel
+                </button>
 
-                      <button
-                        type="submit"
-                        disabled={saving}
-                        className="w-full rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black shadow-[0_10px_30px_rgba(0,0,0,0.25)] transition hover:bg-gray-200 disabled:opacity-60 sm:w-auto"
-                      >
-                        {saving
-                          ? "Saving..."
-                          : editingMember
-                          ? "Update Member"
-                          : "Add Member"}
-                      </button>
-                    </div>
-                  </div>
-                </form>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="w-full rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black shadow-[0_10px_30px_rgba(0,0,0,0.25)] transition hover:bg-gray-200 disabled:opacity-60 sm:w-auto"
+                >
+                  {saving
+                    ? "Saving..."
+                    : editingMember
+                    ? "Update Member"
+                    : "Add Member"}
+                </button>
               </div>
-            </Drawer.Content>
-          </Drawer.Portal>
-        </Drawer.Root>
+            </div>
+          </form>
+        </div>
+      </div>
+    </Drawer.Content>
+  </Drawer.Portal>
+</Drawer.Root>
       </div>
     </div>
   );
