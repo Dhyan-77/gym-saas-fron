@@ -1,6 +1,15 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Navigation from "../components/Navigation";
-import { Plus, Edit2, Trash2, X, Users, Clock3, CheckCircle2 } from "lucide-react";
+import {
+  Plus,
+  Edit2,
+  Trash2,
+  X,
+  Users,
+  Clock3,
+  CheckCircle2,
+  CalendarDays,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Drawer } from "vaul";
 import { api } from "../../api";
@@ -27,6 +36,45 @@ function parseError(err) {
   return err?.message || "Something went wrong";
 }
 
+function DateField({ label, value, onChange, required = false, inputRef }) {
+  const openPicker = () => {
+    if (inputRef?.current?.showPicker) {
+      inputRef.current.showPicker();
+    } else {
+      inputRef?.current?.focus();
+    }
+  };
+
+  return (
+    <div>
+      <label className="mb-2 block text-sm font-medium text-white/70">
+        {label}
+      </label>
+
+      <div className="relative">
+        <input
+          ref={inputRef}
+          type="date"
+          value={value}
+          onChange={onChange}
+          required={required}
+          style={{ colorScheme: "dark" }}
+          className="w-full rounded-xl border border-white/12 bg-[#202632] px-4 py-3 pr-12 text-white outline-none transition focus:border-white/25 focus:ring-2 focus:ring-white/10"
+        />
+
+        <button
+          type="button"
+          onClick={openPicker}
+          className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-white/70 transition hover:bg-white/10 hover:text-white"
+          aria-label={`Select ${label.toLowerCase()}`}
+        >
+          <CalendarDays size={16} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminDashboard() {
   const [members, setMembers] = useState([]);
   const [gymId, setGymId] = useState(null);
@@ -37,6 +85,9 @@ export default function AdminDashboard() {
 
   const [showModal, setShowModal] = useState(false);
   const [editingMember, setEditingMember] = useState(null);
+
+  const startDateRef = useRef(null);
+  const endDateRef = useRef(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -66,10 +117,10 @@ export default function AdminDashboard() {
     <span
       className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
         status === "active"
-          ? "bg-emerald-500/15 text-emerald-300 border border-emerald-400/15"
+          ? "border border-emerald-400/15 bg-emerald-500/15 text-emerald-300"
           : status === "expiring"
-          ? "bg-orange-500/15 text-orange-300 border border-orange-400/15"
-          : "bg-red-500/15 text-red-300 border border-red-400/15"
+          ? "border border-orange-400/15 bg-orange-500/15 text-orange-300"
+          : "border border-red-400/15 bg-red-500/15 text-red-300"
       }`}
     >
       {status === "expiring" ? "Due Soon" : status === "expired" ? "Expired" : "Active"}
@@ -192,31 +243,21 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-[100dvh] bg-[#07090f] text-white">
+    <div className="min-h-[100dvh] bg-[#07090f] pb-24 text-white sm:pb-8">
       <Navigation />
 
       <div className="mx-auto max-w-6xl px-4 py-6 sm:py-8">
-        <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-2xl font-semibold tracking-tight text-white">
-              Students & Members
-            </h1>
-            <p className="mt-1 text-sm text-white/60">
-              Add members, track renewals and keep records clear.
-            </p>
-          </div>
-
-          <button
-            onClick={openAddModal}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-black transition hover:bg-gray-200 active:scale-[0.98]"
-          >
-            <Plus size={18} />
-            Add Member
-          </button>
+        <div className="mb-8">
+          <h1 className="text-2xl font-semibold tracking-tight text-white">
+            Students & Members
+          </h1>
+          <p className="mt-1 text-sm text-white/60">
+            Add members, track renewals and keep records clear.
+          </p>
         </div>
 
         {error && (
-          <div className="mb-5 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-200 whitespace-pre-line">
+          <div className="mb-5 whitespace-pre-line rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-200">
             {error}
           </div>
         )}
@@ -322,6 +363,25 @@ export default function AdminDashboard() {
           ))}
         </div>
 
+        <div className="mt-8 hidden justify-center sm:flex">
+          <button
+            onClick={openAddModal}
+            className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-black shadow-[0_12px_30px_rgba(0,0,0,0.25)] transition hover:bg-gray-200 active:scale-[0.98]"
+          >
+            <Plus size={18} />
+            Add Member
+          </button>
+        </div>
+
+        <div className="fixed bottom-4 left-4 right-4 z-30 sm:hidden">
+          <button
+            onClick={openAddModal}
+            className="w-full rounded-2xl bg-white py-3.5 text-sm font-semibold text-black shadow-[0_16px_40px_rgba(0,0,0,0.35)] transition active:scale-[0.98]"
+          >
+            Add Member
+          </button>
+        </div>
+
         <Drawer.Root open={showModal} onOpenChange={setShowModal}>
           <Drawer.Portal>
             <Drawer.Overlay className="fixed inset-0 z-40 bg-black/70 backdrop-blur-sm" />
@@ -350,7 +410,7 @@ export default function AdminDashboard() {
                 </div>
 
                 {error && (
-                  <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-200 whitespace-pre-line">
+                  <div className="mb-4 whitespace-pre-line rounded-xl border border-red-500/20 bg-red-500/10 p-3 text-sm text-red-200">
                     {error}
                   </div>
                 )}
@@ -406,35 +466,25 @@ export default function AdminDashboard() {
                   </div>
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div>
-                      <label className="mb-2 block text-sm font-medium text-white/70">
-                        Start date
-                      </label>
-                      <input
-                        type="date"
-                        className="w-full rounded-xl border border-white/12 bg-[#202632] px-4 py-3 text-white outline-none transition focus:border-white/25 focus:ring-2 focus:ring-white/10"
-                        value={formData.start_date}
-                        onChange={(e) =>
-                          setFormData({ ...formData, start_date: e.target.value })
-                        }
-                        required
-                      />
-                    </div>
+                    <DateField
+                      label="Start date"
+                      value={formData.start_date}
+                      onChange={(e) =>
+                        setFormData({ ...formData, start_date: e.target.value })
+                      }
+                      required
+                      inputRef={startDateRef}
+                    />
 
-                    <div>
-                      <label className="mb-2 block text-sm font-medium text-white/70">
-                        Renewal date
-                      </label>
-                      <input
-                        type="date"
-                        className="w-full rounded-xl border border-white/12 bg-[#202632] px-4 py-3 text-white outline-none transition focus:border-white/25 focus:ring-2 focus:ring-white/10"
-                        value={formData.end_date}
-                        onChange={(e) =>
-                          setFormData({ ...formData, end_date: e.target.value })
-                        }
-                        required
-                      />
-                    </div>
+                    <DateField
+                      label="Renewal date"
+                      value={formData.end_date}
+                      onChange={(e) =>
+                        setFormData({ ...formData, end_date: e.target.value })
+                      }
+                      required
+                      inputRef={endDateRef}
+                    />
                   </div>
 
                   <div>
