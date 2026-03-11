@@ -8,7 +8,7 @@ import {
 } from "../../utils/gym";
 
 import {
-  Dumbbell,
+  Building2,
   LayoutDashboard,
   Users,
   Bell,
@@ -16,7 +16,6 @@ import {
   LogOut,
   Menu,
   X,
-  Building2,
   Plus,
   ChevronDown,
 } from "lucide-react";
@@ -70,11 +69,11 @@ export default function Navigation() {
   const navItems = [
     { path: "/admin", label: "Overview", icon: LayoutDashboard },
     { path: "/members", label: "Students / Members", icon: Users },
-    { path: "/subscriptions", label: "Fees Due", icon: Bell },
+    { path: "/subscriptions", label: "Renewals", icon: Bell },
     { path: "/pricing", label: "Plans", icon: DollarSign },
   ];
 
-  const showGymSwitcher = location.pathname !== "/pricing";
+  const showCenterSwitcher = location.pathname !== "/pricing";
 
   useEffect(() => {
     let mounted = true;
@@ -178,15 +177,15 @@ export default function Navigation() {
               onClick={() => setOpen(false)}
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
-                <Dumbbell className="h-5 w-5 text-white" />
+                <Building2 className="h-5 w-5 text-white" />
               </div>
 
               <div className="min-w-0">
                 <div className="truncate text-lg font-semibold tracking-[-0.02em] text-white">
-                  GymFlow
+                  Renewa
                 </div>
                 <div className="hidden text-xs text-white/45 sm:block">
-                  Fee & member management
+                  Fee renewals & member tracking
                 </div>
               </div>
             </Link>
@@ -222,7 +221,7 @@ export default function Navigation() {
                 </div>
               )}
 
-              {showGymSwitcher && (
+              {showCenterSwitcher && (
                 <div className="flex items-center gap-2">
                   <div className="relative">
                     <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/45" />
@@ -232,18 +231,18 @@ export default function Navigation() {
                       onChange={handleGymChange}
                       disabled={gymLoading || gyms.length === 0}
                       className="min-w-[180px] appearance-none rounded-xl border border-white/10 bg-white/5 py-2 pl-10 pr-10 text-sm text-white outline-none transition focus:border-white/20 focus:ring-2 focus:ring-white/10 disabled:opacity-60"
-                      title={gymError || "Select gym"}
+                      title={gymError || "Select center"}
                     >
                       {gymLoading && <option value="">Loading…</option>}
 
                       {!gymLoading && gyms.length === 0 && (
-                        <option value="">No gym found</option>
+                        <option value="">No center found</option>
                       )}
 
                       {!gymLoading &&
                         gyms.map((g) => (
                           <option key={g.id} value={g.id}>
-                            {g.name || "Unnamed Gym"}
+                            {g.name || "Unnamed Center"}
                           </option>
                         ))}
                     </select>
@@ -254,7 +253,7 @@ export default function Navigation() {
                     className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
                   >
                     <Plus className="h-4 w-4" />
-                    <span>Add gym</span>
+                    <span>Add center</span>
                   </Link>
                 </div>
               )}
@@ -302,12 +301,12 @@ export default function Navigation() {
               <div className="mb-4 border-b border-white/10 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
-                    <Dumbbell className="h-5 w-5 text-white" />
+                    <Building2 className="h-5 w-5 text-white" />
                   </div>
 
                   <div className="min-w-0">
                     <div className="text-sm font-semibold text-white">
-                      GymFlow
+                      Renewa
                     </div>
                     <div className="text-xs text-white/50">
                       Simple fee tracking
@@ -322,10 +321,10 @@ export default function Navigation() {
                 )}
               </div>
 
-              {showGymSwitcher && (
+              {showCenterSwitcher && (
                 <div className="mb-4 border-b border-white/10 pb-4">
                   <div className="mb-2 text-xs font-medium uppercase tracking-wide text-white/45">
-                    Select gym
+                    Select center
                   </div>
 
                   <div className="relative">
@@ -337,16 +336,16 @@ export default function Navigation() {
                       disabled={gymLoading || gyms.length === 0}
                       className="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 py-3 pl-10 pr-10 text-sm text-white outline-none focus:border-white/20 focus:ring-2 focus:ring-white/10 disabled:opacity-60"
                     >
-                      {gymLoading && <option value="">Loading gyms…</option>}
+                      {gymLoading && <option value="">Loading centers…</option>}
 
                       {!gymLoading && gyms.length === 0 && (
-                        <option value="">No gym found</option>
+                        <option value="">No center found</option>
                       )}
 
                       {!gymLoading &&
                         gyms.map((g) => (
                           <option key={g.id} value={g.id}>
-                            {g.name || "Unnamed Gym"}
+                            {g.name || "Unnamed Center"}
                           </option>
                         ))}
                     </select>
@@ -358,7 +357,7 @@ export default function Navigation() {
                     className="mt-3 flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white/85 transition hover:bg-white/10 hover:text-white"
                   >
                     <Plus className="h-4 w-4" />
-                    <span>Add another gym</span>
+                    <span>Add another center</span>
                   </Link>
 
                   {gymError ? (
