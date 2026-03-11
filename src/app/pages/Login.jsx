@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Dumbbell } from "lucide-react";
+import { Dumbbell,  Building2, } from "lucide-react";
 import { api, getApiBaseURL } from "../../api";
 import { checkAuth } from "../../auth";
 
@@ -117,11 +117,11 @@ export default function Login() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-2xl bg-white/10 backdrop-blur border border-white/10">
-            <Dumbbell className="w-6 h-6 text-white" />
+            <Building2 className="w-6 h-6 text-white" />
           </div>
 
           <h1 className="mt-4 text-2xl font-semibold text-white">
-            GymFlow
+            Renewa
           </h1>
 
           <p className="text-sm text-white/60 mt-1">
