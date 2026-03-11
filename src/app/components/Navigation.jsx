@@ -1,7 +1,11 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "motion/react";
 import { api } from "../../api";
-import { getActiveGymId, setActiveGymId as saveActiveGymId } from "../../utils/gym";
+import {
+  getActiveGymId,
+  setActiveGymId as saveActiveGymId,
+} from "../../utils/gym";
 
 import {
   Dumbbell,
@@ -14,9 +18,9 @@ import {
   X,
   Building2,
   Plus,
+  ChevronDown,
 } from "lucide-react";
 
-// simple DRF error parser (no extra util file needed)
 function parseError(err) {
   const data = err?.response?.data;
 
@@ -35,16 +39,16 @@ function parseError(err) {
   return err?.message || "Something went wrong";
 }
 
-function getProBadgeText(sub) {
-  if (!sub?.is_active) return "";
+function getPlanBadge(sub) {
+  if (!sub?.is_active) return null;
 
   const days = sub?.days_remaining ?? 0;
 
   if (sub?.status === "cancelled") {
-    return `PRO • Ends in ${days} days`;
+    return `Pro active • Ends in ${days} days`;
   }
 
-  return `PRO • ${days} days left`;
+  return `Pro active • ${days} days left`;
 }
 
 export default function Navigation() {
@@ -56,25 +60,22 @@ export default function Navigation() {
 
   const [open, setOpen] = useState(false);
 
-  // gyms dropdown state
   const [gyms, setGyms] = useState([]);
   const [activeGymId, setActiveGymIdState] = useState("");
   const [gymLoading, setGymLoading] = useState(true);
   const [gymError, setGymError] = useState("");
 
-  // subscription state
   const [sub, setSub] = useState(null);
 
   const navItems = [
-    { path: "/admin", label: "Dashboard", icon: LayoutDashboard },
-    { path: "/members", label: "Members", icon: Users },
-    { path: "/subscriptions", label: "Members Status", icon: Bell },
-    { path: "/pricing", label: "Pricing", icon: DollarSign },
+    { path: "/admin", label: "Overview", icon: LayoutDashboard },
+    { path: "/members", label: "Students / Members", icon: Users },
+    { path: "/subscriptions", label: "Fees Due", icon: Bell },
+    { path: "/pricing", label: "Plans", icon: DollarSign },
   ];
 
   const showGymSwitcher = location.pathname !== "/pricing";
 
-  // Load subscription status
   useEffect(() => {
     let mounted = true;
 
@@ -87,7 +88,7 @@ export default function Navigation() {
         if (!mounted) return;
 
         setSub(res.data);
-      } catch (err) {
+      } catch {
         if (!mounted) return;
         setSub(null);
       }
@@ -100,7 +101,6 @@ export default function Navigation() {
     };
   }, []);
 
-  // Load gyms once
   useEffect(() => {
     let mounted = true;
 
@@ -110,6 +110,7 @@ export default function Navigation() {
 
       try {
         const token = localStorage.getItem("access");
+
         if (!token) {
           if (!mounted) return;
           setGyms([]);
@@ -148,7 +149,6 @@ export default function Navigation() {
     setActiveGymIdState(id);
     setOpen(false);
 
-    // simplest + reliable so all pages re-fetch with new gym id
     window.location.reload();
   };
 
@@ -160,149 +160,100 @@ export default function Navigation() {
     setSub(null);
     setGyms([]);
     setActiveGymIdState("");
+    setOpen(false);
     navigate("/login");
   };
 
   const isActivePath = (path) => location.pathname === path;
-  const proBadgeText = getProBadgeText(sub);
+  const proBadgeText = getPlanBadge(sub);
 
   return (
     <nav className="sticky top-0 z-50">
-      <style>{`
-        .nav-glass{
-          background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
-          border-bottom: 1px solid rgba(255,255,255,.10);
-          backdrop-filter: blur(18px);
-          -webkit-backdrop-filter: blur(18px);
-        }
-        .nav-shine{
-          position: relative;
-          overflow: hidden;
-        }
-        .nav-shine:before{
-          content:"";
-          position:absolute;
-          inset:-2px;
-          background: radial-gradient(900px 220px at 14% 0%, rgba(255,255,255,.14), transparent 55%),
-                      radial-gradient(700px 220px at 90% 10%, rgba(255,255,255,.10), transparent 60%);
-          pointer-events:none;
-        }
-        .nav-pill{
-          border: 1px solid rgba(255,255,255,.10);
-          background: rgba(255,255,255,.04);
-        }
-        .nav-pill:hover{ background: rgba(255,255,255,.07); }
-        .nav-pill-active{
-          background: rgba(255,255,255,.10);
-          border: 1px solid rgba(255,255,255,.14);
-          box-shadow: 0 10px 22px rgba(0,0,0,.35);
-        }
-        .ios-chip{
-          background: rgba(34,197,94,.18);
-          border: 1px solid rgba(34,197,94,.28);
-          color: rgba(187,255,214,1);
-          backdrop-filter: blur(14px);
-          -webkit-backdrop-filter: blur(14px);
-        }
-        .ios-iconbtn{
-          border: 1px solid rgba(255,255,255,.12);
-          background: rgba(255,255,255,.05);
-        }
-        .ios-iconbtn:hover{ background: rgba(255,255,255,.08); }
-        .ios-panel{
-          background: linear-gradient(180deg, rgba(255,255,255,.10), rgba(255,255,255,.05));
-          border: 1px solid rgba(255,255,255,.12);
-          box-shadow: 0 18px 50px rgba(0,0,0,.55);
-          backdrop-filter: blur(22px);
-          -webkit-backdrop-filter: blur(22px);
-        }
-        .ios-select{
-          background: rgba(255,255,255,.06);
-          border: 1px solid rgba(255,255,255,.12);
-          color: white;
-        }
-        .ios-select:focus{
-          outline: none;
-          box-shadow: 0 0 0 2px rgba(255,255,255,.10);
-          border-color: rgba(255,255,255,.22);
-        }
-      `}</style>
-
-      <div className="nav-glass nav-shine">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Link to="/admin" className="flex items-center gap-2">
-              <div className="flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 rounded-2xl border border-white/10 bg-white/[0.06]">
-                <Dumbbell className="w-5 h-5 text-white" />
+      <div className="border-b border-white/10 bg-[#0b0d14]/90 backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between gap-3">
+            <Link
+              to="/admin"
+              className="flex min-w-0 items-center gap-3"
+              onClick={() => setOpen(false)}
+            >
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+                <Dumbbell className="h-5 w-5 text-white" />
               </div>
-              <span className="text-lg sm:text-xl font-semibold tracking-[-0.02em]">
-                <span className="bg-gradient-to-b from-white via-white/85 to-white/55 bg-clip-text text-transparent">
+
+              <div className="min-w-0">
+                <div className="truncate text-lg font-semibold tracking-[-0.02em] text-white">
                   GymFlow
-                </span>
-              </span>
+                </div>
+                <div className="hidden text-xs text-white/45 sm:block">
+                  Fee & member management
+                </div>
+              </div>
             </Link>
 
-            <div className="hidden md:flex items-center gap-2">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const active = isActivePath(item.path);
+            <div className="hidden min-w-0 flex-1 items-center justify-center md:flex">
+              <div className="flex items-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] p-1">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActivePath(item.path);
 
-                return (
-                  <Link
-                    key={item.path}
-                    to={item.path}
-                    className={`flex items-center gap-2 px-3.5 lg:px-4 py-2 rounded-2xl transition-all duration-200 ${
-                      active
-                        ? "nav-pill-active text-white"
-                        : "nav-pill text-white/70 hover:text-white"
-                    }`}
-                  >
-                    <Icon className={`w-4 h-4 ${active ? "opacity-100" : "opacity-80"}`} />
-                    <span className="text-sm">{item.label}</span>
-                  </Link>
-                );
-              })}
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm transition ${
+                        active
+                          ? "bg-white text-black shadow-sm"
+                          : "text-white/65 hover:bg-white/5 hover:text-white"
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+              </div>
             </div>
 
-            {sub?.is_active && (
-              <span className="hidden md:inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ios-chip">
-                <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
-                {proBadgeText}
-              </span>
-            )}
+            <div className="hidden items-center gap-3 md:flex">
+              {sub?.is_active && (
+                <div className="rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-300">
+                  {proBadgeText}
+                </div>
+              )}
 
-            <div className="hidden md:flex items-center gap-3">
               {showGymSwitcher && (
                 <div className="flex items-center gap-2">
-                  <Building2 className="w-4 h-4 text-white/60" />
+                  <div className="relative">
+                    <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/45" />
+                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/45" />
+                    <select
+                      value={activeGymId}
+                      onChange={handleGymChange}
+                      disabled={gymLoading || gyms.length === 0}
+                      className="min-w-[180px] appearance-none rounded-xl border border-white/10 bg-white/5 py-2 pl-10 pr-10 text-sm text-white outline-none transition focus:border-white/20 focus:ring-2 focus:ring-white/10 disabled:opacity-60"
+                      title={gymError || "Select gym"}
+                    >
+                      {gymLoading && <option value="">Loading…</option>}
 
-                  <select
-                    value={activeGymId}
-                    onChange={handleGymChange}
-                    disabled={gymLoading || gyms.length === 0}
-                    className="px-3 py-2 rounded-2xl text-sm ios-select disabled:opacity-60"
-                    title={gymError || "Select gym"}
-                  >
-                    {gymLoading && <option value="">Loading gyms…</option>}
+                      {!gymLoading && gyms.length === 0 && (
+                        <option value="">No gym found</option>
+                      )}
 
-                    {!gymLoading && gyms.length === 0 && (
-                      <option value="">No gym found</option>
-                    )}
-
-                    {!gymLoading &&
-                      gyms.map((g) => (
-                        <option key={g.id} value={g.id}>
-                          {g.name || "Unnamed Gym"}
-                        </option>
-                      ))}
-                  </select>
+                      {!gymLoading &&
+                        gyms.map((g) => (
+                          <option key={g.id} value={g.id}>
+                            {g.name || "Unnamed Gym"}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
 
                   <Link
                     to="/gym-setup"
-                    className="flex items-center gap-1.5 px-3 py-2 rounded-2xl ios-iconbtn text-white text-sm transition"
-                    title="Add new gym"
+                    className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="h-4 w-4" />
                     <span>Add gym</span>
                   </Link>
                 </div>
@@ -310,119 +261,148 @@ export default function Navigation() {
 
               <button
                 onClick={handleLogout}
-                className="flex items-center gap-2 px-3 py-2 rounded-2xl text-white/70 hover:text-white transition-colors nav-pill"
+                className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 text-sm text-white/75 transition hover:bg-white/10 hover:text-white"
               >
-                <LogOut className="w-4 h-4" />
-                <span className="text-sm">Logout</span>
+                <LogOut className="h-4 w-4" />
+                <span>Logout</span>
               </button>
             </div>
 
             <button
-              onClick={() => setOpen(!open)}
-              className="md:hidden p-2 rounded-2xl ios-iconbtn"
-              aria-label="Open menu"
+              onClick={() => setOpen((v) => !v)}
+              className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white md:hidden"
+              aria-label={open ? "Close menu" : "Open menu"}
             >
-              {open ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+              {open ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
             </button>
           </div>
         </div>
       </div>
 
-      {open && (
-        <div className="md:hidden">
-          <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
-            onClick={() => setOpen(false)}
-          />
-          <div className="fixed left-3 right-3 top-[76px] z-50 ios-panel rounded-3xl p-3">
-            {sub?.is_active && (
-              <div className="px-2 pt-1 pb-2">
-                <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-semibold ios-chip">
-                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-300" />
-                  {proBadgeText}
-                </span>
-              </div>
-            )}
+      <AnimatePresence>
+        {open && (
+          <>
+            <motion.button
+              type="button"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setOpen(false)}
+              className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm md:hidden"
+              aria-label="Close menu"
+            />
 
-            {showGymSwitcher && (
-              <div className="px-2 pb-2">
-                <div className="text-[11px] uppercase tracking-wide text-white/55 mb-2 flex items-center gap-2">
-                  <Building2 className="w-4 h-4" />
-                  Select Gym
+            <motion.div
+              initial={{ opacity: 0, y: -12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -12 }}
+              transition={{ duration: 0.18 }}
+              className="fixed left-3 right-3 top-[74px] z-50 rounded-3xl border border-white/10 bg-[#11141d] p-4 shadow-2xl md:hidden"
+            >
+              <div className="mb-4 border-b border-white/10 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-2xl border border-white/10 bg-white/5">
+                    <Dumbbell className="h-5 w-5 text-white" />
+                  </div>
+
+                  <div className="min-w-0">
+                    <div className="text-sm font-semibold text-white">
+                      GymFlow
+                    </div>
+                    <div className="text-xs text-white/50">
+                      Simple fee tracking
+                    </div>
+                  </div>
                 </div>
 
-                <select
-                  value={activeGymId}
-                  onChange={handleGymChange}
-                  disabled={gymLoading || gyms.length === 0}
-                  className="w-full px-3 py-3 rounded-2xl text-sm ios-select disabled:opacity-60"
-                >
-                  {gymLoading && <option value="">Loading gyms…</option>}
-
-                  {!gymLoading && gyms.length === 0 && (
-                    <option value="">No gym found</option>
-                  )}
-
-                  {!gymLoading &&
-                    gyms.map((g) => (
-                      <option key={g.id} value={g.id}>
-                        {g.name || "Unnamed Gym"}
-                      </option>
-                    ))}
-                </select>
-
-                <Link
-                  to="/gym-setup"
-                  onClick={() => setOpen(false)}
-                  className="flex items-center justify-center gap-2 mt-2 px-3 py-3 rounded-2xl ios-iconbtn text-white text-sm transition"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span>Add new gym</span>
-                </Link>
-
-                {gymError ? (
-                  <div className="mt-2 text-xs text-red-200/90 whitespace-pre-line">
-                    {gymError}
+                {sub?.is_active && (
+                  <div className="mt-3 inline-flex rounded-full border border-emerald-400/20 bg-emerald-500/10 px-3 py-1.5 text-xs font-medium text-emerald-300">
+                    {proBadgeText}
                   </div>
-                ) : null}
-
-                <div className="my-3 h-px bg-white/10" />
+                )}
               </div>
-            )}
 
-            <div className="space-y-1 px-1">
-              {navItems.map((item) => {
-                const Icon = item.icon;
-                const active = isActivePath(item.path);
+              {showGymSwitcher && (
+                <div className="mb-4 border-b border-white/10 pb-4">
+                  <div className="mb-2 text-xs font-medium uppercase tracking-wide text-white/45">
+                    Select gym
+                  </div>
 
-                return (
+                  <div className="relative">
+                    <Building2 className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/45" />
+                    <ChevronDown className="pointer-events-none absolute right-3 top-1/2 h-4 w-4 -translate-y-1/2 text-white/45" />
+                    <select
+                      value={activeGymId}
+                      onChange={handleGymChange}
+                      disabled={gymLoading || gyms.length === 0}
+                      className="w-full appearance-none rounded-2xl border border-white/10 bg-white/5 py-3 pl-10 pr-10 text-sm text-white outline-none focus:border-white/20 focus:ring-2 focus:ring-white/10 disabled:opacity-60"
+                    >
+                      {gymLoading && <option value="">Loading gyms…</option>}
+
+                      {!gymLoading && gyms.length === 0 && (
+                        <option value="">No gym found</option>
+                      )}
+
+                      {!gymLoading &&
+                        gyms.map((g) => (
+                          <option key={g.id} value={g.id}>
+                            {g.name || "Unnamed Gym"}
+                          </option>
+                        ))}
+                    </select>
+                  </div>
+
                   <Link
-                    key={item.path}
-                    to={item.path}
+                    to="/gym-setup"
                     onClick={() => setOpen(false)}
-                    className={`flex items-center gap-3 px-3 py-3 rounded-2xl transition-all duration-200 ${
-                      active
-                        ? "nav-pill-active text-white"
-                        : "nav-pill text-white/75 hover:text-white"
-                    }`}
+                    className="mt-3 flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white/85 transition hover:bg-white/10 hover:text-white"
                   >
-                    <Icon className="w-5 h-5" />
-                    <span className="text-sm">{item.label}</span>
+                    <Plus className="h-4 w-4" />
+                    <span>Add another gym</span>
                   </Link>
-                );
-              })}
 
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-3 py-3 rounded-2xl nav-pill text-white/75 hover:text-white transition-colors"
-              >
-                <LogOut className="w-5 h-5" />
-                <span className="text-sm">Logout</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+                  {gymError ? (
+                    <div className="mt-2 whitespace-pre-line text-xs text-red-200">
+                      {gymError}
+                    </div>
+                  ) : null}
+                </div>
+              )}
+
+              <div className="space-y-2">
+                {navItems.map((item) => {
+                  const Icon = item.icon;
+                  const active = isActivePath(item.path);
+
+                  return (
+                    <Link
+                      key={item.path}
+                      to={item.path}
+                      onClick={() => setOpen(false)}
+                      className={`flex items-center gap-3 rounded-2xl px-4 py-3 text-sm transition ${
+                        active
+                          ? "bg-white text-black"
+                          : "border border-white/10 bg-white/5 text-white/80 hover:bg-white/10 hover:text-white"
+                      }`}
+                    >
+                      <Icon className="h-5 w-5" />
+                      <span>{item.label}</span>
+                    </Link>
+                  );
+                })}
+
+                <button
+                  onClick={handleLogout}
+                  className="flex w-full items-center gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/80 transition hover:bg-white/10 hover:text-white"
+                >
+                  <LogOut className="h-5 w-5" />
+                  <span>Logout</span>
+                </button>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
     </nav>
   );
 }

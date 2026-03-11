@@ -1,13 +1,14 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Dumbbell } from "lucide-react";
 import { api } from "../../api";
+import { checkAuth } from "../../auth";
 
 export default function Signup() {
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
-    name: "", // UI only (backend doesn't use it)
+    name: "",
     email: "",
     password: "",
     confirmPassword: "",
@@ -19,184 +20,149 @@ export default function Signup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
+  // Skip signup if already logged in
+  useEffect(() => {
+    const verify = async () => {
+      const isAuth = await checkAuth();
+      if (isAuth) navigate("/admin");
+    };
+    verify();
+  }, [navigate]);
+
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  setError("");
+    e.preventDefault();
+    setError("");
 
-  if (formData.password !== formData.confirmPassword) {
-    setError("Passwords do not match.");
-    return;
-  }
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
 
-  setLoading(true);
+    setLoading(true);
 
-  try {
-    // ✅ backend expects only email + password
-    await api.post("/api/auth/signup/", {
-      email: formData.email,
-      password: formData.password,
-    });
+    try {
+      await api.post("/api/auth/signup/", {
+        email: formData.email,
+        password: formData.password,
+      });
 
-    // you DON'T auto-login in backend signup, so redirect to login
-   navigate("/login");
-  } catch (err) {
-    const data = err?.response?.data;
-    const msg =
-      err?.userMessage ||
-      (typeof data?.detail === "string"
-        ? data.detail
-        : data?.email?.[0] ||
-          data?.password?.[0] ||
-          (data && typeof data === "object"
-            ? Object.entries(data)
-                .map(([k, v]) => (Array.isArray(v) ? `${k}: ${v.join(" ")}` : `${k}: ${v}`))
-                .join("\n")
-            : null)) ||
-      err?.message ||
-      "Signup failed. Check your connection and try again.";
-    setError(msg);
-  } finally {
-    setLoading(false);
-  }
-};
+      navigate("/login");
+    } catch (err) {
+      const data = err?.response?.data;
+
+      const msg =
+        err?.userMessage ||
+        data?.detail ||
+        data?.email?.[0] ||
+        data?.password?.[0] ||
+        "Signup failed. Please try again.";
+
+      setError(msg);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-  <div className="relative min-h-[100svh] bg-[#05060a] text-white flex items-center justify-center px-4 py-10 overflow-hidden">
-    {/* Background: premium iOS glass + glow mesh */}
-    <div className="absolute inset-0 pointer-events-none">
-      <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-fuchsia-500/25 blur-3xl" />
-      <div className="absolute top-1/3 -right-28 h-80 w-80 rounded-full bg-sky-400/20 blur-3xl" />
-      <div className="absolute -bottom-24 left-1/4 h-80 w-80 rounded-full bg-violet-500/15 blur-3xl" />
+    <div className="min-h-[100svh] bg-[#07090f] flex items-center justify-center px-4">
+      <div className="w-full max-w-sm">
 
-      <div className="absolute inset-0 bg-[radial-gradient(1200px_800px_at_50%_10%,rgba(255,255,255,0.08),transparent_55%)]" />
-      <div className="absolute inset-0 bg-[radial-gradient(900px_700px_at_50%_100%,rgba(0,0,0,0.55),transparent_60%)]" />
-    </div>
+        {/* Logo */}
+        <div className="text-center mb-8">
+          <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-2xl bg-white/10 backdrop-blur border border-white/10">
+            <Dumbbell className="w-6 h-6 text-white" />
+          </div>
 
-    <div className="w-full max-w-[420px] relative z-10">
-      {/* Header */}
-      <div className="text-center mb-7">
-        <div
-          className="mx-auto inline-flex items-center justify-center w-16 h-16 rounded-[22px]
-                     bg-white/10 border border-white/12 backdrop-blur-xl
-                     shadow-[0_16px_50px_rgba(0,0,0,0.45)] ring-1 ring-white/10"
-        >
-          <Dumbbell className="w-8 h-8 text-white" />
+          <h1 className="mt-4 text-2xl font-semibold text-white">
+            GymFlow
+          </h1>
+
+          <p className="text-sm text-white/60 mt-1">
+            Start tracking members & fees
+          </p>
         </div>
 
-        <h1 className="mt-4 text-[28px] leading-tight font-semibold tracking-[-0.02em]
-                       bg-gradient-to-b from-white via-white/90 to-white/55 bg-clip-text text-transparent">
-          GymFlow
-        </h1>
-        <p className="mt-1 text-[13px] text-white/55">
-          Start managing your gym today
-        </p>
-      </div>
+        {/* Card */}
+        <div className="bg-white/[0.06] backdrop-blur-xl border border-white/[0.1] rounded-2xl p-6 shadow-xl">
 
-      {/* Glass Card */}
-      <div
-        className="relative rounded-[28px] p-[18px]
-                   bg-white/[0.07] border border-white/[0.12] backdrop-blur-2xl
-                   shadow-[0_24px_80px_rgba(0,0,0,0.55)]
-                   ring-1 ring-white/10"
-      >
-        <div
-          className="absolute inset-0 rounded-[28px] pointer-events-none
-                     bg-[linear-gradient(135deg,rgba(255,255,255,0.20),rgba(255,255,255,0.02),rgba(255,255,255,0.06))]
-                     opacity-60"
-        />
-        <div className="relative">
-          <h2 className="text-[22px] font-semibold tracking-[-0.01em] text-center">
-            Create Account
+          <h2 className="text-lg font-semibold text-white text-center">
+            Create your account
           </h2>
-          <p className="mt-1 text-center text-[13px] text-white/50">
-            Create your admin account to get started
+
+          <p className="text-sm text-white/60 text-center mt-1">
+            Takes less than a minute
           </p>
 
           {error && (
-            <div className="mt-5 p-3.5 rounded-2xl bg-rose-500/10 border border-rose-400/25 text-rose-100 text-[13px] break-words whitespace-pre-line">
+            <div className="mt-4 p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-sm text-red-200">
               {error}
             </div>
           )}
 
-          <form onSubmit={handleSubmit} className="mt-6 space-y-4.5">
+          <form onSubmit={handleSubmit} className="mt-6 space-y-4">
+
             {/* Name */}
             <div>
-              <label className="block text-[12px] font-medium text-white/65 mb-2">
+              <label className="text-sm text-white/70">
                 Full name
               </label>
+
               <input
                 type="text"
                 autoComplete="name"
+                required
                 value={formData.name}
                 onChange={(e) =>
                   setFormData({ ...formData, name: e.target.value })
                 }
-                className="w-full px-4 py-3.5 rounded-2xl
-                           bg-white/[0.06] border border-white/[0.10]
-                           text-white placeholder-white/35
-                           shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]
-                           focus:outline-none focus:ring-2 focus:ring-white/25 focus:border-white/20
-                           transition"
                 placeholder="John Doe"
-                required
+                className="mt-1 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/20"
               />
             </div>
 
             {/* Email */}
             <div>
-              <label className="block text-[12px] font-medium text-white/65 mb-2">
-                Email
+              <label className="text-sm text-white/70">
+                Email address
               </label>
+
               <input
                 type="email"
-                inputMode="email"
                 autoComplete="email"
+                required
                 value={formData.email}
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                className="w-full px-4 py-3.5 rounded-2xl
-                           bg-white/[0.06] border border-white/[0.10]
-                           text-white placeholder-white/35
-                           shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]
-                           focus:outline-none focus:ring-2 focus:ring-white/25 focus:border-white/20
-                           transition"
                 placeholder="you@example.com"
-                required
+                className="mt-1 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/20"
               />
             </div>
 
             {/* Password */}
             <div>
-              <label className="block text-[12px] font-medium text-white/65 mb-2">
+              <label className="text-sm text-white/70">
                 Password
               </label>
-              <div className="relative">
+
+              <div className="relative mt-1">
                 <input
                   type={showPassword ? "text" : "password"}
                   autoComplete="new-password"
+                  required
                   minLength={8}
                   value={formData.password}
                   onChange={(e) =>
                     setFormData({ ...formData, password: e.target.value })
                   }
-                  className="w-full px-4 py-3.5 pr-[88px] rounded-2xl
-                             bg-white/[0.06] border border-white/[0.10]
-                             text-white placeholder-white/35
-                             shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]
-                             focus:outline-none focus:ring-2 focus:ring-white/25 focus:border-white/20
-                             transition"
                   placeholder="Minimum 8 characters"
-                  required
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-16 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/20"
                 />
+
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2
-                             px-3 py-1.5 rounded-full text-[12px] font-medium
-                             bg-white/10 border border-white/10 text-white/80
-                             hover:bg-white/14 active:scale-[0.98]
-                             transition"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/70 hover:text-white"
                 >
                   {showPassword ? "Hide" : "Show"}
                 </button>
@@ -205,13 +171,15 @@ export default function Signup() {
 
             {/* Confirm Password */}
             <div>
-              <label className="block text-[12px] font-medium text-white/65 mb-2">
+              <label className="text-sm text-white/70">
                 Confirm password
               </label>
-              <div className="relative">
+
+              <div className="relative mt-1">
                 <input
                   type={showConfirmPassword ? "text" : "password"}
                   autoComplete="new-password"
+                  required
                   minLength={8}
                   value={formData.confirmPassword}
                   onChange={(e) =>
@@ -220,64 +188,51 @@ export default function Signup() {
                       confirmPassword: e.target.value,
                     })
                   }
-                  className="w-full px-4 py-3.5 pr-[88px] rounded-2xl
-                             bg-white/[0.06] border border-white/[0.10]
-                             text-white placeholder-white/35
-                             shadow-[inset_0_1px_0_rgba(255,255,255,0.10)]
-                             focus:outline-none focus:ring-2 focus:ring-white/25 focus:border-white/20
-                             transition"
                   placeholder="Re-enter password"
-                  required
+                  className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 pr-16 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/20"
                 />
+
                 <button
                   type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2
-                             px-3 py-1.5 rounded-full text-[12px] font-medium
-                             bg-white/10 border border-white/10 text-white/80
-                             hover:bg-white/14 active:scale-[0.98]
-                             transition"
+                  onClick={() =>
+                    setShowConfirmPassword(!showConfirmPassword)
+                  }
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-white/70 hover:text-white"
                 >
                   {showConfirmPassword ? "Hide" : "Show"}
                 </button>
               </div>
             </div>
 
-     <div className="flex items-start gap-3">
-
-
-</div>
-
-            {/* Primary */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full mt-1 py-3.5 rounded-2xl font-semibold text-[14px] text-black
-                         bg-[linear-gradient(180deg,#ffffff_0%,#f1f5f9_55%,#e2e8f0_100%)]
-                         shadow-[0_14px_40px_rgba(0,0,0,0.55)]
-                         hover:shadow-[0_18px_60px_rgba(0,0,0,0.60)]
-                         active:scale-[0.985] active:shadow-[0_10px_30px_rgba(0,0,0,0.55)]
-                         disabled:opacity-60 disabled:active:scale-100
-                         transition"
+              className="w-full mt-2 rounded-xl bg-white text-black py-3 font-semibold hover:bg-gray-200 active:scale-[0.98] transition"
             >
-              {loading ? "Creating..." : "Create Account"}
+              {loading ? "Creating account..." : "Create Account"}
             </button>
+
           </form>
 
-          <div className="mt-6 text-center text-[13px] text-white/55">
+          {/* Footer */}
+          <div className="mt-6 text-center text-sm text-white/60">
             Already have an account?{" "}
             <Link
-              to="/"
-              className="text-white/90 hover:text-white underline-offset-4 hover:underline"
+              to="/login"
+              className="text-white font-medium hover:underline"
             >
               Sign in
             </Link>
           </div>
+
+          {/* Trust */}
+          <p className="text-xs text-white/40 text-center mt-6">
+            Secure signup. Your data is protected.
+          </p>
+
         </div>
       </div>
-
-      <div className="h-6" />
     </div>
-  </div>
-);
+  );
 }

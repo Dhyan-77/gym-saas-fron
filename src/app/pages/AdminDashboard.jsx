@@ -1,6 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Navigation from "../components/Navigation";
 import { Plus, Edit2, Trash2, X } from "lucide-react";
+import { toast } from "sonner";
+import { Drawer } from "vaul";
 import { api } from "../../api";
 import { getActiveGymId } from "../../utils/gym";
 
@@ -26,6 +28,7 @@ function parseError(err) {
 }
 
 export default function AdminDashboard() {
+
   const [members, setMembers] = useState([]);
   const [gymId, setGymId] = useState(null);
 
@@ -62,26 +65,22 @@ export default function AdminDashboard() {
 
   const StatusPill = ({ status }) => (
     <span
-      className={`inline-flex px-3 py-1 rounded-full text-xs ${
+      className={`px-3 py-1 rounded-full text-xs font-medium ${
         status === "active"
-          ? "bg-green-500/20 text-green-400"
+          ? "bg-green-500/15 text-green-400"
           : status === "expiring"
-          ? "bg-orange-500/20 text-orange-400"
-          : "bg-red-500/20 text-red-400"
+          ? "bg-orange-500/15 text-orange-400"
+          : "bg-red-500/15 text-red-400"
       }`}
     >
-      {status}
+      {status === "expiring" ? "Due Soon" : status}
     </span>
   );
 
-  // ✅ Load active gym + members
   useEffect(() => {
     let mounted = true;
 
     async function load() {
-      setLoading(true);
-      setError("");
-
       try {
         const gymsRes = await api.get("/api/gyms/");
         const gyms = Array.isArray(gymsRes.data) ? gymsRes.data : [];
@@ -91,18 +90,11 @@ export default function AdminDashboard() {
           return;
         }
 
-        // ✅ THIS is the key change: use active gym from localStorage (or fallback)
         const activeId = getActiveGymId(gyms);
-
-        if (!activeId) {
-          window.location.href = "/gym-setup";
-          return;
-        }
 
         if (!mounted) return;
         setGymId(activeId);
 
-        // ✅ use correct URL (no placeholder)
         const membersRes = await api.get(`/api/gyms/${activeId}/members/`);
         const list = Array.isArray(membersRes.data) ? membersRes.data : [];
 
@@ -116,13 +108,10 @@ export default function AdminDashboard() {
     }
 
     load();
-    return () => {
-      mounted = false;
-    };
+    return () => (mounted = false);
   }, []);
 
   const openAddModal = () => {
-    setError("");
     setEditingMember(null);
     setFormData({
       name: "",
@@ -137,8 +126,8 @@ export default function AdminDashboard() {
   };
 
   const openEditModal = (member) => {
-    setError("");
     setEditingMember(member);
+
     setFormData({
       name: member.name || "",
       phone: member.phone || "",
@@ -148,28 +137,30 @@ export default function AdminDashboard() {
       course_taken: member.course_taken || "",
       offer_taken: member.offer_taken || "",
     });
+
     setShowModal(true);
   };
 
-  const handleDeleteMember = async (memberId) => {
+  const handleDeleteMember = async (id) => {
     if (!gymId) return;
-    if (!confirm("Are you sure you want to delete this member?")) return;
+
+    if (!confirm("Delete this member?")) return;
 
     try {
-      // ✅ your backend URL ends with /delete (no trailing slash)
-      await api.delete(`/api/gyms/${gymId}/members/${memberId}/delete`);
-      setMembers((prev) => prev.filter((m) => m.id !== memberId));
+      await api.delete(`/api/gyms/${gymId}/members/${id}/delete`);
+
+      setMembers((prev) => prev.filter((m) => m.id !== id));
+
+      toast.success("Member deleted");
     } catch (err) {
-      alert(parseError(err));
+      toast.error(parseError(err));
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!gymId) return;
 
     setSaving(true);
-    setError("");
 
     try {
       if (editingMember) {
@@ -177,332 +168,211 @@ export default function AdminDashboard() {
           `/api/gyms/${gymId}/members/${editingMember.id}/`,
           formData
         );
+
         setMembers((prev) =>
           prev.map((m) => (m.id === editingMember.id ? res.data : m))
         );
+
+        toast.success("Member updated");
       } else {
         const res = await api.post(`/api/gyms/${gymId}/members/`, formData);
+
         setMembers((prev) => [res.data, ...prev]);
+
+        toast.success("Member added");
       }
 
       setShowModal(false);
     } catch (err) {
-      setError(parseError(err));
+      toast.error(parseError(err));
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <div className="relative min-h-[100dvh] bg-black text-white">
+    <div className="min-h-[100dvh] bg-[#07090f] text-white">
       <Navigation />
 
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-10 left-6 sm:top-1/4 sm:left-1/4 w-56 h-56 sm:w-96 sm:h-96 bg-purple-600/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-10 right-6 sm:bottom-1/4 sm:right-1/4 w-56 h-56 sm:w-96 sm:h-96 bg-blue-600/10 rounded-full blur-3xl" />
-      </div>
+      <div className="max-w-6xl mx-auto px-4 py-8">
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 relative z-10">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6 sm:mb-8">
+        {/* Header */}
+
+        <div className="flex items-center justify-between mb-8">
+
           <div>
-            <h1 className="text-2xl sm:text-4xl mb-1 sm:mb-2 bg-gradient-to-r from-white via-gray-200 to-gray-400 bg-clip-text text-transparent">
-              Member Management
+            <h1 className="text-2xl font-semibold">
+              Students & Members
             </h1>
-            <p className="text-sm sm:text-base text-gray-400">
-              Add, edit, and manage your gym members
+
+            <p className="text-sm text-white/60">
+              Track renewals and manage members
             </p>
           </div>
 
           <button
             onClick={openAddModal}
-            disabled={loading}
-            className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 sm:px-6 py-3 bg-white text-black rounded-xl hover:bg-gray-200 transition-all duration-200 shadow-lg disabled:opacity-60"
+            className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-xl font-medium hover:bg-gray-200"
           >
-            <Plus className="w-5 h-5" />
-            Add Member
+            <Plus size={18} />
+            Add Student
           </button>
         </div>
 
-        {error && (
-          <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-200 text-sm whitespace-pre-line">
-            {error}
-          </div>
-        )}
-
         {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8">
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 sm:p-6">
-            <div className="text-gray-400 text-sm mb-2">Total Members</div>
-            <div className="text-2xl sm:text-3xl">{loading ? "…" : stats.total}</div>
+
+        <div className="grid grid-cols-3 gap-4 mb-8">
+
+          <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+            <p className="text-sm text-white/60">Total</p>
+            <p className="text-2xl font-semibold">{stats.total}</p>
           </div>
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 sm:p-6">
-            <div className="text-gray-400 text-sm mb-2">Active Members</div>
-            <div className="text-2xl sm:text-3xl text-green-400">
-              {loading ? "…" : stats.active}
-            </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+            <p className="text-sm text-white/60">Active</p>
+            <p className="text-2xl font-semibold text-green-400">{stats.active}</p>
           </div>
-          <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-5 sm:p-6">
-            <div className="text-gray-400 text-sm mb-2">Expiring Soon (≤ 7 days)</div>
-            <div className="text-2xl sm:text-3xl text-orange-400">
-              {loading ? "…" : stats.expiring}
-            </div>
+
+          <div className="bg-white/5 border border-white/10 rounded-xl p-4">
+            <p className="text-sm text-white/60">Due Soon</p>
+            <p className="text-2xl font-semibold text-orange-400">
+              {stats.expiring}
+            </p>
           </div>
+
         </div>
 
-        {/* Desktop Table */}
-        <div className="hidden md:block bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-white/10">
-                  <th className="text-left px-6 py-4 text-gray-400 text-sm">Name</th>
-                  <th className="text-left px-6 py-4 text-gray-400 text-sm">Phone</th>
-                  <th className="text-left px-6 py-4 text-gray-400 text-sm">Plan</th>
-                  <th className="text-left px-6 py-4 text-gray-400 text-sm">End Date</th>
-                  <th className="text-left px-6 py-4 text-gray-400 text-sm">Days Left</th>
-                  <th className="text-left px-6 py-4 text-gray-400 text-sm">Status</th>
-                  <th className="text-right px-6 py-4 text-gray-400 text-sm">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {!loading && membersWithStatus.length === 0 && (
-                  <tr>
-                    <td className="px-6 py-6 text-gray-400" colSpan={7}>
-                      No members yet. Click “Add Member”.
-                    </td>
-                  </tr>
-                )}
+        {/* Member List */}
 
-                {membersWithStatus.map((m) => (
-                  <tr
-                    key={m.id}
-                    className="border-b border-white/5 hover:bg-white/5 transition-colors"
-                  >
-                    <td className="px-6 py-4">{m.name}</td>
-                    <td className="px-6 py-4 text-gray-400">{m.phone || "-"}</td>
-                    <td className="px-6 py-4">{m.plan}</td>
-                    <td className="px-6 py-4 text-gray-400">{m.end_date}</td>
-                    <td className="px-6 py-4 text-gray-400">{m.days_left}</td>
-                    <td className="px-6 py-4">
-                      <StatusPill status={m.status} />
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center justify-end gap-2">
-                        <button
-                          onClick={() => openEditModal(m)}
-                          className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                        >
-                          <Edit2 className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteMember(m.id)}
-                          className="p-2 hover:bg-red-500/20 text-red-400 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-
-                {loading &&
-                  Array.from({ length: 3 }).map((_, idx) => (
-                    <tr key={idx} className="border-b border-white/5">
-                      <td className="px-6 py-4 text-gray-600" colSpan={7}>
-                        Loading…
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* Mobile Cards */}
-        <div className="md:hidden space-y-3">
-          {!loading && membersWithStatus.length === 0 && (
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 text-gray-400">
-              No members yet. Tap “Add Member”.
-            </div>
-          )}
+        <div className="space-y-3">
 
           {membersWithStatus.map((m) => (
+
             <div
               key={m.id}
-              className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4"
+              className="bg-white/5 border border-white/10 rounded-xl p-4"
             >
-              <div className="flex items-start justify-between gap-3">
+
+              <div className="flex items-center justify-between">
+
                 <div>
-                  <div className="text-base font-medium">{m.name}</div>
-                  <div className="text-sm text-gray-400">{m.phone || "-"}</div>
+                  <p className="font-medium">{m.name}</p>
+                  <p className="text-sm text-white/60">{m.phone || "-"}</p>
                 </div>
+
                 <StatusPill status={m.status} />
+
               </div>
 
-              <div className="mt-3 grid grid-cols-2 gap-3 text-sm">
+              <div className="mt-3 flex justify-between text-sm text-white/70">
+
                 <div>
-                  <div className="text-gray-400">Plan</div>
-                  <div className="text-white">{m.plan}</div>
+                  <p>Plan</p>
+                  <p className="text-white">{m.plan}</p>
                 </div>
+
                 <div>
-                  <div className="text-gray-400">Days Left</div>
-                  <div className="text-white">{m.days_left}</div>
+                  <p>Renewal</p>
+                  <p className="text-white">{m.end_date}</p>
                 </div>
-                <div className="col-span-2">
-                  <div className="text-gray-400">End Date</div>
-                  <div className="text-white">{m.end_date}</div>
+
+                <div>
+                  <p>Days</p>
+                  <p className="text-white">{m.days_left}</p>
                 </div>
+
               </div>
 
-              <div className="mt-4 flex items-center justify-end gap-2">
+              <div className="mt-4 flex justify-end gap-2">
+
                 <button
                   onClick={() => openEditModal(m)}
-                  className="px-3 py-2 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors flex items-center gap-2"
+                  className="px-3 py-2 bg-white/5 border border-white/10 rounded-lg flex items-center gap-2"
                 >
-                  <Edit2 className="w-4 h-4" />
-                  <span className="text-sm">Edit</span>
+                  <Edit2 size={16} />
+                  Edit
                 </button>
+
                 <button
                   onClick={() => handleDeleteMember(m.id)}
-                  className="px-3 py-2 rounded-lg bg-red-500/10 border border-red-500/20 text-red-300 hover:bg-red-500/20 transition-colors flex items-center gap-2"
+                  className="px-3 py-2 bg-red-500/10 border border-red-500/20 text-red-300 rounded-lg flex items-center gap-2"
                 >
-                  <Trash2 className="w-4 h-4" />
-                  <span className="text-sm">Delete</span>
+                  <Trash2 size={16} />
+                  Delete
                 </button>
+
               </div>
+
             </div>
+
           ))}
 
-          {loading && (
-            <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl p-4 text-gray-600">
-              Loading…
-            </div>
-          )}
         </div>
-      </div>
 
-      {/* Modal */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-          <div className="bg-black border border-white/10 rounded-2xl w-full max-w-md max-h-[85dvh] overflow-y-auto">
-            <div className="p-5 sm:p-8">
-              <div className="flex items-center justify-between mb-5 sm:mb-6">
-                <h2 className="text-xl sm:text-2xl">
-                  {editingMember ? "Edit Member" : "Add New Member"}
-                </h2>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                >
-                  <X className="w-5 h-5" />
-                </button>
-              </div>
+        {/* Drawer */}
+
+        <Drawer.Root open={showModal} onOpenChange={setShowModal}>
+          <Drawer.Portal>
+            <Drawer.Overlay className="fixed inset-0 bg-black/60" />
+
+            <Drawer.Content className="fixed bottom-0 left-0 right-0 bg-[#111] rounded-t-2xl p-6 max-h-[90vh] overflow-y-auto">
+
+              <h2 className="text-xl font-semibold mb-6">
+                {editingMember ? "Edit Member" : "Add Member"}
+              </h2>
 
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm text-gray-300 mb-2">Name *</label>
+
+                <input
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3"
+                  placeholder="Name"
+                  value={formData.name}
+                  onChange={(e)=>setFormData({...formData,name:e.target.value})}
+                  required
+                />
+
+                <input
+                  className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3"
+                  placeholder="Phone"
+                  value={formData.phone}
+                  onChange={(e)=>setFormData({...formData,phone:e.target.value})}
+                />
+
+                <div className="grid grid-cols-2 gap-3">
+
                   <input
-                    type="text"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
+                    type="date"
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-3"
+                    value={formData.start_date}
+                    onChange={(e)=>setFormData({...formData,start_date:e.target.value})}
                     required
                   />
-                </div>
 
-                <div>
-                  <label className="block text-sm text-gray-300 mb-2">Phone</label>
                   <input
-                    type="tel"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-                    placeholder="10-digit number"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm text-gray-300 mb-2">Plan *</label>
-                  <select
-                    value={formData.plan}
-                    onChange={(e) => setFormData({ ...formData, plan: e.target.value })}
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
+                    type="date"
+                    className="bg-white/5 border border-white/10 rounded-xl px-4 py-3"
+                    value={formData.end_date}
+                    onChange={(e)=>setFormData({...formData,end_date:e.target.value})}
                     required
-                  >
-                    <option value="monthly">Monthly</option>
-                    <option value="yearly">Yearly</option>
-                  </select>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-gray-300 mb-2">Start Date *</label>
-                    <input
-                      type="date"
-                      value={formData.start_date}
-                      onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm text-gray-300 mb-2">End Date *</label>
-                    <input
-                      type="date"
-                      value={formData.end_date}
-                      onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                      className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm text-gray-300 mb-2">Course Taken</label>
-                  <input
-                    type="text"
-                    value={formData.course_taken}
-                    onChange={(e) =>
-                      setFormData({ ...formData, course_taken: e.target.value })
-                    }
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
                   />
+
                 </div>
 
-                <div>
-                  <label className="block text-sm text-gray-300 mb-2">Offer Taken</label>
-                  <input
-                    type="text"
-                    value={formData.offer_taken}
-                    onChange={(e) =>
-                      setFormData({ ...formData, offer_taken: e.target.value })
-                    }
-                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white focus:outline-none focus:border-white/30"
-                  />
-                </div>
+                <button
+                  type="submit"
+                  disabled={saving}
+                  className="w-full bg-white text-black py-3 rounded-xl font-medium"
+                >
+                  {saving ? "Saving..." : editingMember ? "Update Member" : "Add Member"}
+                </button>
 
-                <div className="flex flex-col sm:flex-row gap-3 pt-4">
-                  <button
-                    type="button"
-                    onClick={() => setShowModal(false)}
-                    disabled={saving}
-                    className="w-full sm:flex-1 px-6 py-3 bg-white/5 border border-white/10 text-white rounded-xl hover:bg-white/10 transition-all disabled:opacity-60"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    disabled={saving}
-                    className="w-full sm:flex-1 px-6 py-3 bg-white text-black rounded-xl hover:bg-gray-200 transition-all disabled:opacity-60"
-                  >
-                    {saving ? "Saving..." : editingMember ? "Update" : "Add"} Member
-                  </button>
-                </div>
               </form>
-            </div>
-          </div>
-        </div>
-      )}
+
+            </Drawer.Content>
+          </Drawer.Portal>
+        </Drawer.Root>
+
+      </div>
     </div>
   );
 }

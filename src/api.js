@@ -1,10 +1,9 @@
 import axios from "axios";
 
-// Same-origin: dev uses Vite proxy, production uses Netlify proxy (netlify.toml).
-// No cross-origin = no CORS issues on mobile.
+// Same-origin proxy
 const baseURL = "";
 
-console.log("API Base URL:", baseURL); // Debug logging
+console.log("API Base URL:", baseURL);
 
 export const api = axios.create({
   baseURL,
@@ -15,18 +14,27 @@ export const api = axios.create({
 export const getApiBaseURL = () => baseURL;
 
 
-// ✅ attach JWT automatically
+// ----------------------------
+// Attach Access Token
+// ----------------------------
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem("access");
+
   if (token) {
     config.headers = config.headers || {};
     config.headers.Authorization = `Bearer ${token}`;
   }
+
   return config;
 });
 
+
+// ----------------------------
+// Auto Refresh Token
+// ----------------------------
 api.interceptors.response.use(
-  (res) => res,
+  (response) => response,
+
   async (error) => {
     const originalRequest = error.config;
 
@@ -39,24 +47,37 @@ api.interceptors.response.use(
       const refresh = localStorage.getItem("refresh");
 
       if (!refresh) {
+        localStorage.clear();
         window.location.href = "/login";
-        return;
+        return Promise.reject(error);
       }
 
       try {
-        const res = await api.post("/api/auth/refresh/", {
-          refresh,
-        });
+        const response = await axios.post(
+          "/api/auth/refresh/",
+          { refresh }
+        );
 
-        localStorage.setItem("access", res.data.access);
+        const newAccess = response.data.access;
 
-        originalRequest.headers.Authorization =
-          "Bearer " + res.data.access;
+        localStorage.setItem("access", newAccess);
+
+        // update header
+        api.defaults.headers.common[
+          "Authorization"
+        ] = `Bearer ${newAccess}`;
+
+        originalRequest.headers[
+          "Authorization"
+        ] = `Bearer ${newAccess}`;
 
         return api(originalRequest);
-      } catch (err) {
+
+      } catch (refreshError) {
         localStorage.clear();
         window.location.href = "/login";
+
+        return Promise.reject(refreshError);
       }
     }
 
