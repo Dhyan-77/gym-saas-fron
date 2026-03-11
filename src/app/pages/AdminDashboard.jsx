@@ -65,7 +65,7 @@ function DateField({ label, value, onChange, required = false, inputRef }) {
         <button
           type="button"
           onClick={openPicker}
-          className="absolute right-2 top-1/2 -translate-y-1/2 inline-flex h-9 w-9 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-white/70 transition hover:bg-white/10 hover:text-white"
+          className="absolute right-2 top-1/2 inline-flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-lg border border-white/10 bg-white/5 text-white/70 transition hover:bg-white/10 hover:text-white"
           aria-label={`Select ${label.toLowerCase()}`}
         >
           <CalendarDays size={16} />
@@ -181,7 +181,6 @@ export default function AdminDashboard() {
   const openEditModal = (member) => {
     setError("");
     setEditingMember(member);
-
     setFormData({
       name: member.name || "",
       phone: member.phone || "",
@@ -191,13 +190,11 @@ export default function AdminDashboard() {
       course_taken: member.course_taken || "",
       offer_taken: member.offer_taken || "",
     });
-
     setShowModal(true);
   };
 
   const handleDeleteMember = async (id) => {
     if (!gymId) return;
-
     if (!confirm("Delete this member?")) return;
 
     try {
@@ -389,7 +386,7 @@ export default function AdminDashboard() {
             <Drawer.Content className="fixed bottom-0 left-0 right-0 z-50 max-h-[92vh] overflow-y-auto rounded-t-[28px] border-t border-white/15 bg-[#161a22] shadow-[0_-20px_60px_rgba(0,0,0,0.55)]">
               <div className="mx-auto mt-3 h-1.5 w-12 rounded-full bg-white/20" />
 
-              <div className="mx-auto max-w-xl p-5 sm:p-6">
+              <div className="mx-auto max-w-xl p-5 pb-24 sm:p-6 sm:pb-28">
                 <div className="mb-6 flex items-start justify-between gap-4">
                   <div>
                     <h2 className="text-xl font-semibold text-white">
@@ -515,26 +512,28 @@ export default function AdminDashboard() {
                     />
                   </div>
 
-                  <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
-                    <button
-                      type="button"
-                      onClick={() => setShowModal(false)}
-                      className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white/85 transition hover:bg-white/10 sm:w-auto"
-                    >
-                      Cancel
-                    </button>
+                  <div className="sticky bottom-0 -mx-5 mt-6 border-t border-white/10 bg-[#161a22]/95 px-5 pb-5 pt-4 backdrop-blur-xl sm:-mx-6 sm:px-6">
+                    <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                      <button
+                        type="button"
+                        onClick={() => setShowModal(false)}
+                        className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-sm font-medium text-white/85 transition hover:bg-white/10 sm:w-auto"
+                      >
+                        Cancel
+                      </button>
 
-                    <button
-                      type="submit"
-                      disabled={saving}
-                      className="w-full rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black transition hover:bg-gray-200 disabled:opacity-60 sm:w-auto"
-                    >
-                      {saving
-                        ? "Saving..."
-                        : editingMember
-                        ? "Update Member"
-                        : "Add Member"}
-                    </button>
+                      <button
+                        type="submit"
+                        disabled={saving}
+                        className="w-full rounded-xl bg-white px-5 py-3 text-sm font-semibold text-black shadow-[0_10px_30px_rgba(0,0,0,0.25)] transition hover:bg-gray-200 disabled:opacity-60 sm:w-auto"
+                      >
+                        {saving
+                          ? "Saving..."
+                          : editingMember
+                          ? "Update Member"
+                          : "Add Member"}
+                      </button>
+                    </div>
                   </div>
                 </form>
               </div>
