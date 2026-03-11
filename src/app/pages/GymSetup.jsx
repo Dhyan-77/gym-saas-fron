@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Dumbbell, MapPin } from "lucide-react";
+import { Building2, MapPin } from "lucide-react";
 import { api } from "../../api";
 import { setActiveGymId } from "../../utils/gym";
 
@@ -34,7 +34,7 @@ export default function GymSetup() {
     setError("");
 
     if (!navigator.geolocation) {
-      setError("Location not supported on this device.");
+      setError("Location is not supported on this device.");
       return;
     }
 
@@ -85,7 +85,7 @@ export default function GymSetup() {
         (data && typeof data === "object"
           ? Object.values(data).flat().join(" ")
           : null) ||
-        "Failed to create gym";
+        "Failed to create center";
 
       setError(msg);
     } finally {
@@ -96,31 +96,27 @@ export default function GymSetup() {
   return (
     <div className="min-h-[100svh] bg-[#07090f] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
-
-        {/* Logo */}
         <div className="text-center mb-8">
           <div className="mx-auto flex items-center justify-center h-14 w-14 rounded-2xl bg-white/10 border border-white/10">
-            <Dumbbell className="w-6 h-6 text-white" />
+            <Building2 className="w-6 h-6 text-white" />
           </div>
 
           <h1 className="mt-4 text-2xl font-semibold text-white">
-            GymFlow
+            Renewa
           </h1>
 
           <p className="text-sm text-white/60 mt-1">
-            {hasExistingGyms ? "Add another gym" : "Create your gym"}
+            {hasExistingGyms ? "Add another center" : "Create your center"}
           </p>
         </div>
 
-        {/* Card */}
         <div className="bg-white/[0.06] border border-white/[0.1] rounded-2xl p-6 backdrop-blur-xl shadow-xl">
-
           <h2 className="text-lg font-semibold text-white text-center">
-            Gym details
+            Center details
           </h2>
 
           <p className="text-sm text-white/60 text-center mt-1">
-            You can edit this later anytime
+            You can update these details later
           </p>
 
           {error && (
@@ -130,11 +126,9 @@ export default function GymSetup() {
           )}
 
           <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-
-            {/* Gym Name */}
             <div>
               <label className="text-sm text-white/70">
-                Gym name
+                Center name
               </label>
 
               <input
@@ -144,12 +138,11 @@ export default function GymSetup() {
                 onChange={(e) =>
                   setFormData({ ...formData, gymName: e.target.value })
                 }
-                placeholder="e.g. Iron Paradise Gym"
+                placeholder="e.g. Bright Academy, Yoga Studio"
                 className="mt-1 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/20"
               />
             </div>
 
-            {/* Address */}
             <div>
               <label className="text-sm text-white/70">
                 Address (optional)
@@ -161,27 +154,24 @@ export default function GymSetup() {
                 onChange={(e) =>
                   setFormData({ ...formData, address: e.target.value })
                 }
-                placeholder="Street, City"
+                placeholder="Street, area, city"
                 className="mt-1 w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/20"
               />
             </div>
 
-            {/* Location Button */}
             <button
               type="button"
               onClick={handleUseLocation}
               className="w-full flex items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 py-3 text-sm text-white hover:bg-white/10 transition"
             >
               <MapPin size={16} />
-
               {locStatus === "locating"
                 ? "Detecting location..."
                 : locStatus === "ok"
-                ? "Location captured"
+                ? "Location added"
                 : "Use current location"}
             </button>
 
-            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
@@ -190,16 +180,14 @@ export default function GymSetup() {
               {loading
                 ? "Saving..."
                 : hasExistingGyms
-                ? "Add Gym"
-                : "Create Gym"}
+                ? "Add Center"
+                : "Create Center"}
             </button>
-
           </form>
 
           <p className="text-xs text-white/40 text-center mt-6">
-            Your gym information is private and secure.
+            Your center information is private and secure.
           </p>
-
         </div>
       </div>
     </div>
