@@ -71,6 +71,7 @@ export default function Navigation() {
     { path: "/members", label: "Students / Members", icon: Users },
     { path: "/subscriptions", label: "Renewals", icon: Bell },
     { path: "/pricing", label: "Plans", icon: DollarSign },
+    {path : "/revenue", label: "Revenue", icon: DollarSign}
   ];
 
   const showCenterSwitcher = location.pathname !== "/pricing";

@@ -7,6 +7,7 @@ import AdminDashboard from "./pages/AdminDashboard";
 import AllMembers from "./pages/AllMembers";
 import Subscriptions from "./pages/Subscriptions";
 import Pricing from "./pages/Pricing";
+import Revenue  from "./pages/Revenue";
 
 export const router = createBrowserRouter([
   // ✅ Make / go to /login (clean URLs)
@@ -22,6 +23,7 @@ export const router = createBrowserRouter([
   { path: "/members", element: <AllMembers /> },
   { path: "/subscriptions", element: <Subscriptions /> },
   { path: "/pricing", element: <Pricing /> },
+  { path: "/revenue", element: <Revenue /> },
 
   // ✅ Catch-all
   { path: "*", element: <Navigate to="/login" replace /> },
